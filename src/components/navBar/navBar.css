@@ -1,0 +1,25 @@
+/* NavBar.css */
+
+/* Fondo negro para la barra de navegación */
+.navbar {
+    background-color: #000000; /* Fondo negro */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Sombra para darle efecto */
+  }
+  
+  /* Estilo de los botones */
+  .navbar-link {
+    color: #ffffff; /* Letras en blanco */
+    font-size: 1.1rem; /* Tamaño de letra más grande */
+    font-weight: 500; /* Fuente semi-bold para mayor visibilidad */
+    margin-right: 20px;
+    text-transform: uppercase; /* Letras en mayúsculas */
+    transition: color 0.3s ease, background-color 0.3s ease; /* Transición suave para el hover */
+  }
+  
+  .navbar-link:hover {
+    background-color: #ffffff; /* Fondo blanco al hacer hover */
+    color: #000000; /* Texto negro al hacer hover */
+    border-radius: 4px; /* Bordes redondeados */
+    padding: 6px 12px; /* Espaciado para hacerlo más interactivo */
+  }
+  

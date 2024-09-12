@@ -1,0 +1,126 @@
+/* Home.css */
+
+/* Fondo con degradado y formas suaves */
+.home-background {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 40px 0;
+}
+
+/* Estilo de la sección principal */
+.hero-section {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 0;
+  margin-bottom: 60px; /* Separación con la siguiente sección */
+}
+
+/* Título grande y destacado */
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Subtítulo con explicación */
+.hero-subtitle {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 30px;
+}
+
+/* Botones principales con tamaño grande */
+.hero-buttons .custom-button {
+  font-size: 1.2rem;
+  padding: 12px 24px;
+  margin-right: 20px;
+}
+
+.custom-button.primary {
+  background-color: #ff9800;
+  color: white;
+}
+
+.custom-button.primary:hover {
+  background-color: #fb8c00;
+}
+
+.custom-button.secondary {
+  background-color: #03a9f4;
+  color: white;
+}
+
+.custom-button.secondary:hover {
+  background-color: #0288d1;
+}
+
+/* Sección de características */
+.features-section {
+  margin-top: 60px;
+  text-align: center;
+  margin-bottom: 60px; /* Separación con la siguiente sección */
+}
+
+.feature-box {
+  margin-bottom: 40px;
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.feature-description {
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin-top: 10px;
+  color: #f0f0f0;
+}
+
+/* Sección de comentarios */
+.testimonials-section {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.testimonials-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.testimonial {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.testimonial-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.testimonial-avatar {
+  width: 60px;
+  height: 60px;
+  margin-right: 15px;
+}
+
+.testimonial-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.testimonial-text {
+  font-size: 1rem;
+}
