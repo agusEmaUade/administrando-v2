@@ -2,7 +2,7 @@
 import React from 'react';
 
 function Login() {
-  return <h1>Iniciar Sesión</h1>;
+  return <h1>Iniciar Sesión, yes</h1>;
 }
 
 export default Login;
