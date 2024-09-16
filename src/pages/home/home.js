@@ -74,7 +74,7 @@ function Home() {
             <Box className="testimonials-container">
               <Box className="testimonial">
                 <Box className="testimonial-header">
-                  <Avatar src="/path/to/avatar1.jpg" className="testimonial-avatar" />
+                  <Avatar src={require("../../assets/imagenes/Anaimagen.png")} className="testimonial-avatar" />
                   <Typography variant="body2" className="testimonial-name">
                     Ana García
                   </Typography>
@@ -85,7 +85,7 @@ function Home() {
               </Box>
               <Box className="testimonial">
                 <Box className="testimonial-header">
-                  <Avatar src="/path/to/avatar2.jpg" className="testimonial-avatar" />
+                  <Avatar src={require("../../assets/imagenes/Luis.enc")} className="testimonial-avatar" />
                   <Typography variant="body2" className="testimonial-name">
                     Luis Fernández
                   </Typography>
@@ -96,7 +96,7 @@ function Home() {
               </Box>
               <Box className="testimonial">
                 <Box className="testimonial-header">
-                  <Avatar src="/path/to/avatar3.jpg" className="testimonial-avatar" />
+                  <Avatar src={require("../../assets/imagenes/Maria.webp")} className="testimonial-avatar" />
                   <Typography variant="body2" className="testimonial-name">
                     Marta López
                   </Typography>
