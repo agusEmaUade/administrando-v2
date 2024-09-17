@@ -1,6 +1,6 @@
 // pages/Login.js
 import React from 'react';
-import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box } from '@mui/material';
+import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box, Link } from '@mui/material';
 
 function Login() {
   return (
@@ -27,7 +27,7 @@ function Login() {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label="Email"
             name="email"
             autoComplete="email"
             autoFocus
@@ -37,15 +37,21 @@ function Login() {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="Contraseña"
             type="password"
             id="password"
             autoComplete="current-password"
           />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Recordar credenciales"
+            />
+            <Link href="#" variant="body2">
+              ¿Olvidaste tu contraseña?
+            </Link>
+            
+          </Box>
           <Button
             type="submit"
             fullWidth
