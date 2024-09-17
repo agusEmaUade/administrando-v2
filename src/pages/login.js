@@ -49,7 +49,7 @@ function Login() {
               control={<Checkbox value="remember" color="primary" />}
               label="Recordar credenciales"
             />
-            <Link to="/recuperar-cuenta" style={{ textDecoration: 'none', color: blue[500] }}>
+            <Link to="/recuperar-cuenta" style={{ textDecoration: 'none', color: 'primary' }}>
               ¿Olvidaste tu contraseña?
             </Link>
           </Box>
@@ -60,7 +60,7 @@ function Login() {
             color="primary"
             sx={{ mt: 3, mb: 2 }}
           >
-            Submit
+            Iniciar Sesion
           </Button>
         </Box>
       </Box>
