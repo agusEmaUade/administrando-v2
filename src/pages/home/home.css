@@ -15,7 +15,7 @@
 }*/
 
 .home-background {
-  background-image: url('C:\Users\Lucas\Documents\GitHub\administrando-v2\src\assets\imagenes\dolarimagen.jpeg'); 
+  background-image: url('../../assets/imagenes/dolarimagen.jpeg'); 
   min-height: 100vh;
   display: flex;
   justify-content: center;

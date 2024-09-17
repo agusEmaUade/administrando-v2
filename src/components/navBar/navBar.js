@@ -11,33 +11,25 @@ function NavBar() {
           className="navbar-link"
           color="inherit"
           component={Link}
+          to="/dashboard"
+        >
+          Dashboard
+        </Button>
+        <Button
+          className="navbar-link"
+          color="inherit"
+          component={Link}
+          to="/perfil"
+        >
+          MI Perfil
+        </Button>
+        <Button
+          className="navbar-link"
+          color="inherit"
+          component={Link}
           to="/"
         >
-          Home
-        </Button>
-        <Button
-          className="navbar-link"
-          color="inherit"
-          component={Link}
-          to="/login"
-        >
-          Login
-        </Button>
-        <Button
-          className="navbar-link"
-          color="inherit"
-          component={Link}
-          to="/registro"
-        >
-          Registro
-        </Button>
-        <Button
-          className="navbar-link"
-          color="inherit"
-          component={Link}
-          to="/recuperar-cuenta"
-        >
-          Recuperar Cuenta
+          Cerrar sesion
         </Button>
       </Toolbar>
     </AppBar>
