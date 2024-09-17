@@ -1,6 +1,7 @@
 // pages/Registro.js
 import React from 'react';
-import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box } from '@mui/material';
+import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box, Alert, Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 function Registro() {
   return (
@@ -13,7 +14,7 @@ function Registro() {
           mt: 8,
         }}
       >
-        <Typography variant="h5">¿Primera vez? ¡Registrate!</Typography>
+        <Typography variant="h5">¿Primera vez? ¡Regístrate!</Typography>
         <Box
           component="form"
           noValidate
@@ -27,7 +28,7 @@ function Registro() {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label="Email"
             name="email"
             autoComplete="email"
             autoFocus
@@ -37,23 +38,36 @@ function Registro() {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="Contraseña"
             type="password"
             id="password"
             autoComplete="current-password"
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
+            label="Recordar credenciales"
           />
+          
+          <Alert
+            severity="info"
+            sx={{ width: '100%', mt: 2, mb: 2 }}
+            action={
+              <Link to="/recuperar-cuenta" component={RouterLink} color="inherit">
+                ¡Toca acá!
+              </Link>
+            }
+          >
+            ¿Tienes cuenta y no te acuerdas la contraseña?{' '}
+          </Alert>
+          
           <Button
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 2, mb: 2 }}
           >
-            Submit
+            Registrarse
           </Button>
         </Box>
       </Box>
