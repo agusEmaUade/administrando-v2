@@ -72,6 +72,7 @@ function Login() {
             error={errorEmail}
             helperText={errorEmail ? 'El campo Email es obligatorio' : ''}
           />
+          
           <TextField
             margin="normal"
             required
@@ -94,6 +95,9 @@ function Login() {
               ¿Olvidaste tu contraseña?
             </Link>
           </Box>
+          <div class="alert alert-primary" role="alert">
+            Aun no tenes cuenta?  <a href="#" class="alert-link"> Selecciona aca</a>. Para crearte una si quieres ;)
+          </div>
           <Button
             type="submit"
             fullWidth
