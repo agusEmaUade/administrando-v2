@@ -14,25 +14,25 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault(); // Previene la recarga de la página
 
-     // Validaciones de campos obligatorios
-     let valid = true;
+    // Validaciones de campos obligatorios
+    let valid = true;
 
-     if (email.trim() === '') {
-       setErrorEmail(true);
-       valid = false;
-     } else {
-       setErrorEmail(false);
-     }
- 
-     if (password.trim() === '') {
-       setErrorPassword(true);
-       valid = false;
-     } else {
-       setErrorPassword(false);
-     }
+    if (email.trim() === '') {
+      setErrorEmail(true);
+      valid = false;
+    } else {
+      setErrorEmail(false);
+    }
 
-     // Si los campos están llenos y las credenciales son correctas
-     if (valid && email === 'test' && password === '1234') {
+    if (password.trim() === '') {
+      setErrorPassword(true);
+      valid = false;
+    } else {
+      setErrorPassword(false);
+    }
+
+    // Si los campos están llenos y las credenciales son correctas
+    if (valid && email === 'test' && password === '1234') {
       navigate('/dash');
     } else if (valid) {
       alert('Usuario o contraseña incorrecta');
@@ -95,8 +95,8 @@ function Login() {
               ¿Olvidaste tu contraseña?
             </Link>
           </Box>
-          <div class="alert alert-primary" role="alert">
-            Aun no tenes cuenta?  <a href="#" class="alert-link"> Selecciona aca</a>. Para crearte una si quieres ;)
+          <div className="alert alert-primary" role="alert">
+            Aun no tenes cuenta? <Link to="/registro" className="alert-link">Selecciona acá</Link> para crear una cuenta.
           </div>
           <Button
             type="submit"
@@ -105,7 +105,7 @@ function Login() {
             color="primary"
             sx={{ mt: 3, mb: 2 }}
           >
-            Iniciar Sesion
+            Iniciar Sesión
           </Button>
         </Box>
       </Box>
