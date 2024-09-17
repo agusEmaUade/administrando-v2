@@ -1,36 +1,67 @@
-import React from 'react';
-import { AppBar, Toolbar, Button } from '@mui/material';
+import React, { useState } from 'react';
+import { AppBar, Toolbar, Button, IconButton, Menu, MenuItem, Avatar, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import './navBar.css'; // Archivo de estilos personalizados
 
 function NavBar() {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  // Manejo del click en el ícono de usuario
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  // Manejo del cierre del menú
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <AppBar position="static" className="navbar">
       <Toolbar className="navbar-toolbar">
-        <Button
-          className="navbar-link"
+        {/* Dashboard alineado a la izquierda */}
+        <Box sx={{ flexGrow: 1 }}>
+          <Button
+            className="navbar-link"
+            color="inherit"
+            component={Link}
+            to="/dashboard"
+          >
+            Dashboard
+          </Button>
+        </Box>
+
+        {/* Ícono de usuario alineado a la derecha */}
+        <IconButton
+          edge="end"
           color="inherit"
-          component={Link}
-          to="/dashboard"
+          onClick={handleMenuClick}
         >
-          Dashboard
-        </Button>
-        <Button
-          className="navbar-link"
-          color="inherit"
-          component={Link}
-          to="/perfil"
+          <Avatar></Avatar> {/* Inicial del usuario, puedes personalizarla */}
+        </IconButton>
+
+        {/* Menú desplegable */}
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
         >
-          MI Perfil
-        </Button>
-        <Button
-          className="navbar-link"
-          color="inherit"
-          component={Link}
-          to="/"
-        >
-          Cerrar sesion
-        </Button>
+          <MenuItem onClick={handleClose} component={Link} to="/perfil">
+            Mi Perfil
+          </MenuItem>
+          <MenuItem onClick={handleClose} component={Link} to="/">
+            Cerrar sesión
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
