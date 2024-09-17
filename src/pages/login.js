@@ -1,8 +1,6 @@
 // pages/Login.js
 import React, { useState } from 'react';
-import React, { useState } from 'react';
 import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom'; // Importa el Link de react-router-dom
 import { Link, useNavigate } from 'react-router-dom'; // Importa el Link de react-router-dom
 import { blue } from '@mui/material/colors'; // Importa el color azul de MUI
 
