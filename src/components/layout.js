@@ -4,8 +4,10 @@ import NavBar from './navBar/navBar.js';
 
 function Layout({ children }) {
   return (
+    /*este se va, el navbar y tamb el import navbar */
     <div>
-      <NavBar />
+      
+       <NavBar />  
       <main>{children}</main>
     </div>
   );
