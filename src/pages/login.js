@@ -1,6 +1,8 @@
 // pages/Login.js
 import React from 'react';
-import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box, Link } from '@mui/material';
+import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box } from '@mui/material';
+import { Link } from 'react-router-dom'; // Importa el Link de react-router-dom
+import { blue } from '@mui/material/colors'; // Importa el color azul de MUI
 
 function Login() {
   return (
@@ -47,10 +49,9 @@ function Login() {
               control={<Checkbox value="remember" color="primary" />}
               label="Recordar credenciales"
             />
-            <Link href="#" variant="body2">
+            <Link to="/recuperar-cuenta" style={{ textDecoration: 'none', color: blue[500] }}>
               ¿Olvidaste tu contraseña?
             </Link>
-            
           </Box>
           <Button
             type="submit"
