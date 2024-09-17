@@ -33,7 +33,7 @@ function Login() {
 
     // Si los campos están llenos y las credenciales son correctas
     if (valid && email === 'test' && password === '1234') {
-      navigate('/dash');
+      navigate('/dashboard');
     } else if (valid) {
       alert('Usuario o contraseña incorrecta');
     }
