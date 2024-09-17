@@ -38,7 +38,7 @@ function RecuperarCuenta() {
             severity="info"
             sx={{ width: '100%', mt: 2, mb: 2 }}
             action={
-              <Link to="/registro" component={RouterLink} color="inherit">
+              <Link to="/login" component={RouterLink} color="inherit">
                 Regresar al inicio de sesión
               </Link>
             }
