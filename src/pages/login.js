@@ -1,6 +1,8 @@
 // pages/Login.js
 import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom'; // Importa el Link de react-router-dom
 import { Link, useNavigate } from 'react-router-dom'; // Importa el Link de react-router-dom
 import { blue } from '@mui/material/colors'; // Importa el color azul de MUI
 
@@ -14,25 +16,25 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault(); // Previene la recarga de la página
 
-     // Validaciones de campos obligatorios
-     let valid = true;
+    // Validaciones de campos obligatorios
+    let valid = true;
 
-     if (email.trim() === '') {
-       setErrorEmail(true);
-       valid = false;
-     } else {
-       setErrorEmail(false);
-     }
- 
-     if (password.trim() === '') {
-       setErrorPassword(true);
-       valid = false;
-     } else {
-       setErrorPassword(false);
-     }
+    if (email.trim() === '') {
+      setErrorEmail(true);
+      valid = false;
+    } else {
+      setErrorEmail(false);
+    }
 
-     // Si los campos están llenos y las credenciales son correctas
-     if (valid && email === 'test' && password === '1234') {
+    if (password.trim() === '') {
+      setErrorPassword(true);
+      valid = false;
+    } else {
+      setErrorPassword(false);
+    }
+
+    // Si los campos están llenos y las credenciales son correctas
+    if (valid && email === 'test' && password === '1234') {
       navigate('/dashboard');
     } else if (valid) {
       alert('Usuario o contraseña incorrecta');
@@ -72,6 +74,7 @@ function Login() {
             error={errorEmail}
             helperText={errorEmail ? 'El campo Email es obligatorio' : ''}
           />
+          
           <TextField
             margin="normal"
             required
@@ -94,6 +97,9 @@ function Login() {
               ¿Olvidaste tu contraseña?
             </Link>
           </Box>
+          <div className="alert alert-primary" role="alert">
+            Aun no tenes cuenta? <Link to="/registro" className="alert-link">Selecciona acá</Link> para crear una cuenta.
+          </div>
           <Button
             type="submit"
             fullWidth
@@ -101,7 +107,7 @@ function Login() {
             color="primary"
             sx={{ mt: 3, mb: 2 }}
           >
-            Submit
+            Iniciar Sesión
           </Button>
         </Box>
       </Box>
