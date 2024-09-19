@@ -6,6 +6,8 @@ import Login from './pages/login';
 import Registro from './pages/registro';
 import RecuperarCuenta from './pages/recuperarCuenta';
 import Dashboard from './pages/dashboard/dashboard.js';
+import Perfil from './pages/perfil/perfil.js';
+import DetalleProyecto from './pages/detalleProyecto/detalleProyecto.js';
 import Layout from './components/layout';
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
           <Route path="/registro" element={<Registro />} />
           <Route path="/recuperar-cuenta" element={<RecuperarCuenta />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/mi-perfil" element={<Perfil />} />
+          <Route path="/detalle-proyecto" element={<DetalleProyecto/>} />
         </Routes>
       </Layout>
     </Router>

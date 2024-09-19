@@ -55,7 +55,7 @@ function NavBar() {
             horizontal: 'right',
           }}
         >
-          <MenuItem onClick={handleClose} component={Link} to="/perfil">
+          <MenuItem onClick={handleClose} component={Link} to="/mi-perfil">
             Mi Perfil
           </MenuItem>
           <MenuItem onClick={handleClose} component={Link} to="/">
