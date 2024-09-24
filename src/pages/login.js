@@ -11,6 +11,7 @@ function Login() {
   const [errorPassword, setErrorPassword] = useState(false);
   const navigate = useNavigate(); // Inicializa useNavigate para redireccionar
 
+
   const handleSubmit = (e) => {
     e.preventDefault(); // Previene la recarga de la página
 
@@ -31,8 +32,11 @@ function Login() {
       setErrorPassword(false);
     }
 
+    const bd = JSON.parse(localStorage.getItem("appData"));
+    const usuarioMach = bd.usuarios.find(u => u.email === email && u.password === password);
     // Si los campos están llenos y las credenciales son correctas
-    if (valid && email === 'test' && password === '1234') {
+    if (valid && usuarioMach) {
+      localStorage.setItem("userLogin", JSON.stringify(usuarioMach));
       navigate('/dashboard');
     } else if (valid) {
       alert('Usuario o contraseña incorrecta');

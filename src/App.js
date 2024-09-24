@@ -15,13 +15,13 @@ function App() {
     usuarios: [
       {
         id: 1,
-        email: "juan.perez@example.com",
-        password: "password123",
+        email: "test@example.com",
+        password: "123",
       },
       {
         id: 2,
-        email: "ana.lopez@example.com",
-        password: "password456",
+        email: "ana@example.com",
+        password: "456",
       },
       // Agrega más usuarios según lo necesites
     ],
@@ -32,15 +32,15 @@ function App() {
         descripcion: "Descripción del proyecto 1",
         montoTotal: 1000,
         usuarios: [
-          { id: 1, email: "juan.perez@example.com" },
-          { id: 2, email: "ana.lopez@example.com" },
+          { id: 1, email: "test@example.com" },
+          { id: 2, email: "ana@example.com" },
         ],
         tickets: [
           {
             id: 101,
             monto: 200,
             fecha: "2024-09-24",
-            usuariosParticipantes: [{ id: 1, email: "juan.perez@example.com" }],
+            usuariosParticipantes: [{ id: 1, email: "test@example.com" }],
             archivo: {
               nombre: "ticket.jpg",
               data: "",
@@ -50,7 +50,7 @@ function App() {
             id: 102,
             monto: 300,
             fecha: "2024-09-23",
-            usuariosParticipantes: [{ id: 2, email: "ana.lopez@example.com" }],
+            usuariosParticipantes: [{ id: 2, email: "ana@example.com" }],
             archivo: {
               nombre: "ticket.jpg",
               data: "",
@@ -63,13 +63,13 @@ function App() {
         titulo: "Proyecto 2",
         descripcion: "Descripción del proyecto 2",
         montoTotal: 1500,
-        usuarios: [{ id: 1, email: "juan.perez@example.com" }],
+        usuarios: [{ id: 1, email: "test@example.com" }],
         tickets: [
           {
             id: 201,
             monto: 400,
             fecha: "2024-09-20",
-            usuariosParticipantes: [{ id: 1, email: "juan.perez@example.com" }],
+            usuariosParticipantes: [{ id: 1, email: "test@example.com" }],
             archivo: {
               nombre: "ticket.jpg",
               data: "",
@@ -83,7 +83,7 @@ function App() {
         id: 101,
         monto: 200,
         fecha: "2024-09-24",
-        usuariosParticipantes: [{ id: 1, email: "juan.perez@example.com" }],
+        usuariosParticipantes: [{ id: 1, email: "test@example.com" }],
         archivo: {
           nombre: "ticket.jpg",
           data: "",
@@ -93,7 +93,7 @@ function App() {
         id: 102,
         monto: 300,
         fecha: "2024-09-23",
-        usuariosParticipantes: [{ id: 2, email: "ana.lopez@example.com" }],
+        usuariosParticipantes: [{ id: 2, email: "ana@example.com" }],
         archivo: {
           nombre: "ticket.jpg",
           data: "",
@@ -103,7 +103,7 @@ function App() {
         id: 201,
         monto: 400,
         fecha: "2024-09-20",
-        usuariosParticipantes: [{ id: 1, email: "juan.perez@example.com" }],
+        usuariosParticipantes: [{ id: 1, email: "test@example.com" }],
         archivo: {
           nombre: "ticket.jpg",
           data: "",
