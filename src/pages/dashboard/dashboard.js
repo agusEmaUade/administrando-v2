@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -22,15 +22,31 @@ function Dashboard() {
   const navigate = useNavigate(); // Para redirigir
   
   // Estado para manejar la lista de proyectos
-  const [projects, setProjects] = useState([
-    { id: 1, name: 'Proyecto A', description: 'Descripción del Proyecto A', totalAmount: 1000 },
-    { id: 2, name: 'Proyecto B', description: 'Descripción del Proyecto B', totalAmount: 2000 },
-  ]);
+  const [projects, setProjects] = useState([]);
+  const [userLogin, setUserLogin] = useState(null);
+  const [appData, setAppData] = useState(null);
 
   // Estado para manejar el modal
   const [open, setOpen] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
   const [errors, setErrors] = useState({ name: false, description: false });
+
+  // Obtener datos de localStorage
+  useEffect(() => {
+    const storedUserLogin = JSON.parse(localStorage.getItem('userLogin'));
+    const storedAppData = JSON.parse(localStorage.getItem('appData'));
+
+    if (storedUserLogin && storedAppData) {
+      setUserLogin(storedUserLogin);
+      setAppData(storedAppData);
+      
+      // Filtrar los proyectos que incluyen al usuario logueado
+      const userProjects = storedAppData.proyectos.filter(project => 
+        project.usuarios.some(user => user.id === storedUserLogin.id)
+      );
+      setProjects(userProjects);
+    }
+  }, []);
 
   // Función para manejar la apertura del modal
   const handleOpen = () => {
@@ -53,13 +69,32 @@ function Dashboard() {
       });
       return;
     }
-    const project = {
-      id: projects.length + 1,
-      name: newProject.name,
-      description: newProject.description,
-      totalAmount: 0,
+
+    // Crear el nuevo proyecto
+    const newProjectData = {
+      id: appData.proyectos.length + 1, // ID dinámico basado en la cantidad de proyectos actuales
+      titulo: newProject.name,
+      descripcion: newProject.description,
+      montoTotal: 0,
+      usuarios: [userLogin], // Asignar el usuario logueado como miembro del proyecto
+      tickets: []
     };
-    setProjects([...projects, project]);
+
+    // Actualizar el localStorage
+    const updatedAppData = {
+      ...appData,
+      proyectos: [...appData.proyectos, newProjectData]
+    };
+
+    localStorage.setItem('appData', JSON.stringify(updatedAppData));
+    setAppData(updatedAppData); // Actualizar el estado con los nuevos datos
+
+    // Filtrar y actualizar la lista de proyectos del usuario logueado
+    const userProjects = updatedAppData.proyectos.filter(project =>
+      project.usuarios.some(user => user.id === userLogin.id)
+    );
+    setProjects(userProjects); // Actualizar los proyectos mostrados en pantalla
+
     handleClose(); // Cierra el modal después de agregar el proyecto
   };
 
@@ -79,18 +114,18 @@ function Dashboard() {
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
               {/* Nombre y descripción en la izquierda */}
               <Box>
-                <Typography variant="h5">{project.name}</Typography>
+                <Typography variant="h5">{project.titulo}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {project.description}
+                  {project.descripcion}
                 </Typography>
               </Box>
               {/* Monto total en la derecha */}
               <Typography variant="h6" sx={{ textAlign: 'right' }}>
-                ${project.totalAmount}
+                ${project.montoTotal}
               </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'flex-end' }}>
-              <Button size="small" variant="outlined" color="primary" onClick={() => navigate("/detalle-proyecto")}>
+              <Button size="small" variant="outlined" color="primary" onClick={() => navigate(`/detalle-proyecto/${project.id}`)}>
                 Ver Detalle
               </Button>
             </CardActions>

@@ -130,7 +130,7 @@ function App() {
           <Route path="/recuperar-cuenta" element={<RecuperarCuenta />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/mi-perfil" element={<Perfil />} />
-          <Route path="/detalle-proyecto" element={<DetalleProyecto />} />
+          <Route path="/detalle-proyecto/:id" element={<DetalleProyecto />} />
         </Routes>
       </Layout>
     </Router>
