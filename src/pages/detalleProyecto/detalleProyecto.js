@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Container, Typography, Box, IconButton, Tooltip } from "@mui/material";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -12,10 +12,12 @@ import {
   AddReaction as AddReactionIcon,
   AttachFile as AttachFileIcon,
   MonetizationOn as MonetizationOnIcon,
+  ArrowBack as ArrowBackIcon, // Importar ícono de flecha
 } from "@mui/icons-material"; // Importar íconos de Material-UI
 
 function DetalleProyecto() {
   const { id } = useParams();
+  const navigate = useNavigate(); // Inicializa el hook para la navegación
   const [project, setProject] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [members, setMembers] = useState([]);
@@ -145,6 +147,10 @@ function DetalleProyecto() {
     <div>
       <NavBar />
       <Container maxWidth="lg" sx={{ mt: 5 }}>
+        {/* Icono de flecha para volver */}
+        <IconButton onClick={() => navigate("/dashboard")} color="primary">
+          <ArrowBackIcon />
+        </IconButton>
         <Typography variant="h4" gutterBottom>
           Detalle del Proyecto: {project?.titulo}
         </Typography>
