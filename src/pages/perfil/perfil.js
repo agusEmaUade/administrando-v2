@@ -5,42 +5,66 @@ import { useNavigate } from "react-router-dom";
 function Perfil() {
   // Estado para los datos del perfil
   const [profileData, setProfileData] = useState({
-    name: "José",
-    email: "jose@example.com",
-    password: "1234",
+    email: "",
+    password: "",
   });
 
   // Estados para controlar la habilitación del botón y las validaciones
-  const [isEdited, setIsEdited] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
   const navigate = useNavigate(); // Para redirigir con el botón "Volver"
 
+  // Cargar la información del usuario desde localStorage al montar el componente
+  useEffect(() => {
+    const userLogin = JSON.parse(localStorage.getItem("userLogin"));
+    if (userLogin) {
+      setProfileData({
+        email: userLogin.email,
+        password: userLogin.password,
+      });
+    }
+  }, []);
+
   // Función para manejar los cambios en los inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData((prevData) => ({ ...prevData, [name]: value }));
-    setIsEdited(true); // Marcar como editado
 
     // Validar si el campo email tiene formato válido
     if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       setEmailError(!emailRegex.test(value));
     }
-  };
 
-  // Efecto para habilitar el botón de guardar solo si los campos están completos y editados
-  useEffect(() => {
-    const isComplete =
-      profileData.name && profileData.email && profileData.password;
-    setIsSaveDisabled(!(isComplete && isEdited && !emailError));
-  }, [profileData, isEdited, emailError]);
+    // Habilitar el botón de guardar solo si hay un cambio y no hay errores
+    const isComplete = profileData.email && profileData.password;
+    setIsSaveDisabled(!(isComplete && !emailError));
+  };
 
   // Función para manejar el evento de guardar
   const handleSave = () => {
     if (!isSaveDisabled) {
-      // Aquí iría la lógica para guardar los datos actualizados
+      // Guardar los datos actualizados en localStorage
+      const updatedUser = {
+        id: JSON.parse(localStorage.getItem("userLogin")).id,
+        email: profileData.email,
+        password: profileData.password,
+      };
+
+      localStorage.setItem("userLogin", JSON.stringify(updatedUser));
+
+      const appData = JSON.parse(localStorage.getItem("appData"));
+      if (appData) {
+        const updatedUsers = appData.usuarios.map((user) =>
+          user.id === updatedUser.id ? updatedUser : user
+        );
+        localStorage.setItem(
+          "appData",
+          JSON.stringify({ ...appData, usuarios: updatedUsers })
+        );
+      }
+
       alert("Perfil guardado con éxito");
     }
   };
@@ -50,15 +74,6 @@ function Perfil() {
       <Box sx={{ textAlign: "center", mb: 4 }}>
         <Typography variant="h4">Gestionar Perfil</Typography>
       </Box>
-
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Nombre"
-        name="name"
-        value={profileData.name}
-        onChange={handleInputChange}
-      />
 
       <TextField
         fullWidth
