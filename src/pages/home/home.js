@@ -9,19 +9,29 @@ function Home() {
       <Container maxWidth="lg">
         <Box sx={{ textAlign: 'center', py: 5 }}>
           {/* Sección principal con título y botones */}
-          <Box className="hero-section">
-            <Typography variant="h2" component="h1" className="hero-title" gutterBottom>
-              Divide gastos de manera simple y clara
+          <Box className="hero-section"sx={{ mt: -4 }}>
+            <Typography variant="h2" component="h1" className="hero-title" gutterBottom sx={{ fontFamily: 'Tahoma, sans-seriff'}}>
+              Divide gastos de manera simple y clara.
+
             </Typography>
-            <Typography variant="h5" className="hero-subtitle" gutterBottom>
+            <Typography variant="h5" className="hero-subtitle" gutterBottom sx={{ fontFamily: 'Lobster, cursive'}} sx={{ mt: 5 }}>
               Con nuestra aplicación, gestionar y dividir los gastos es más fácil que nunca. ¡Conéctate con amigos, familiares o compañeros de trabajo!
             </Typography>
 
-            <Box className="hero-buttons">
+            <Box className="hero-buttons" sx={{ mt: 6 }}>
+
               <Button 
                 className="custom-button primary"
                 component={Link} 
                 to="/registro"
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#1976d2', // Cambia el color de fondo al pasar el mouse
+                    color: 'black', // Cambia el color de la tipografía a negro
+                    transform: 'scale(1.05)', // Efecto de agrandado
+                  },
+                  transition: 'all 0.3s ease', // Añade la transición suave
+                }}
               >
                 Regístrate Gratis
               </Button>
@@ -29,6 +39,14 @@ function Home() {
                 className="custom-button secondary"
                 component={Link} 
                 to="/login"
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#1976d2', // Cambia el color de fondo
+                    color: 'black', // Cambia la tipografía a negro
+                    transform: 'scale(1.05)', // Efecto de agrandado
+                  },
+                  transition: 'all 0.3s ease', // Efecto suave de transición
+                }}
               >
                 Inicia Sesión
               </Button>
@@ -37,7 +55,7 @@ function Home() {
 
           {/* Sección de características principales */}
           <Box className="features-section">
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h4" gutterBottom sx={{ mt: -5 }}>
               ¿Por qué usar nuestro Administrador de Gastos?
             </Typography>
             <Box className="feature-box">
