@@ -134,46 +134,78 @@ function Home() {
 
 
           {/* Sección de comentarios */}
+
+          
           <Box className="testimonials-section">
-            <Typography variant="h4" gutterBottom>
-              Lo que dicen nuestros usuarios
-            </Typography>
-            <Box className="testimonials-container">
-              <Box className="testimonial">
-                <Box className="testimonial-header">
-                  <Avatar src={require("../../assets/imagenes/Anaimagen.png")} className="testimonial-avatar" />
-                  <Typography variant="body2" className="testimonial-name">
-                    Ana García
-                  </Typography>
-                </Box>
-                <Typography variant="body1" className="testimonial-text">
-                  "Esta aplicación ha hecho que dividir gastos con mis amigos sea mucho más fácil y sin estrés. ¡Me encanta!"
-                </Typography>
-              </Box>
-              <Box className="testimonial">
-                <Box className="testimonial-header">
-                  <Avatar src={require("../../assets/imagenes/Luis.enc")} className="testimonial-avatar" />
-                  <Typography variant="body2" className="testimonial-name">
-                    Luis Fernández
-                  </Typography>
-                </Box>
-                <Typography variant="body1" className="testimonial-text">
-                  "La mejor herramienta para llevar un control de mis gastos compartidos. Muy intuitiva y útil."
-                </Typography>
-              </Box>
-              <Box className="testimonial">
-                <Box className="testimonial-header">
-                  <Avatar src={require("../../assets/imagenes/Maria.webp")} className="testimonial-avatar" />
-                  <Typography variant="body2" className="testimonial-name">
-                    Marta López
-                  </Typography>
-                </Box>
-                <Typography variant="body1" className="testimonial-text">
-                  "Simple, eficiente y todo lo que necesitaba para manejar mis gastos en grupo. Muy recomendada."
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
+  <Typography variant="h4" gutterBottom>
+    Lo que dicen nuestros usuarios
+  </Typography>
+  <Box className="testimonials-container">
+    <Box 
+      className="testimonial" 
+      sx={{
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Transición suave
+        '&:hover': {
+          transform: 'scale(1.05)', // Efecto de agrandado
+          boxShadow: '0 8px 12px rgba(0,0,0,0.2)', // Sombra más fuerte al hacer hover
+        },
+      }}
+    >
+      <Box className="testimonial-header">
+        <Avatar src={require("../../assets/imagenes/Anaimagen.png")} className="testimonial-avatar" />
+        <Typography variant="body2" className="testimonial-name">
+          Ana García
+        </Typography>
+      </Box>
+      <Typography variant="body1" className="testimonial-text">
+        "Esta aplicación ha hecho que dividir gastos con mis amigos sea mucho más fácil y sin estrés. ¡Me encanta!"
+      </Typography>
+    </Box>
+
+    <Box 
+      className="testimonial" 
+      sx={{
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          boxShadow: '0 8px 12px rgba(0,0,0,0.2)',
+        },
+      }}
+    >
+      <Box className="testimonial-header">
+        <Avatar src={require("../../assets/imagenes/Luis.enc")} className="testimonial-avatar" />
+        <Typography variant="body2" className="testimonial-name">
+          Luis Fernández
+        </Typography>
+      </Box>
+      <Typography variant="body1" className="testimonial-text">
+        "La mejor herramienta para llevar un control de mis gastos compartidos. Muy intuitiva y útil."
+      </Typography>
+    </Box>
+
+    <Box 
+      className="testimonial" 
+      sx={{
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          boxShadow: '0 8px 12px rgba(0,0,0,0.2)',
+        },
+      }}
+    >
+      <Box className="testimonial-header">
+        <Avatar src={require("../../assets/imagenes/Maria.webp")} className="testimonial-avatar" />
+        <Typography variant="body2" className="testimonial-name">
+          Marta López
+        </Typography>
+      </Box>
+      <Typography variant="body1" className="testimonial-text">
+        "Simple, eficiente y todo lo que necesitaba para manejar mis gastos en grupo. Muy recomendada."
+      </Typography>
+    </Box>
+  </Box>
+</Box>
+
         </Box>
       </Container>
     </div>
