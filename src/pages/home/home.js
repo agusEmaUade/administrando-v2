@@ -54,35 +54,84 @@ function Home() {
           </Box>
 
           {/* Sección de características principales */}
-          <Box className="features-section">
-            <Typography variant="h4" gutterBottom sx={{ mt: -5 }}>
-              ¿Por qué usar nuestro Administrador de Gastos?
-            </Typography>
-            <Box className="feature-box">
-              <Typography variant="h6" className="feature-title">
-                Fácil de usar
-              </Typography>
-              <Typography variant="body1" className="feature-description">
-                Crea grupos, añade gastos y nuestro sistema se encargará de dividir todo de manera equitativa o personalizada.
-              </Typography>
-            </Box>
-            <Box className="feature-box">
-              <Typography variant="h6" className="feature-title">
-                Mantén el control
-              </Typography>
-              <Typography variant="body1" className="feature-description">
-                Lleva un registro detallado de tus gastos compartidos y sabe siempre cuánto te deben o cuánto debes.
-              </Typography>
-            </Box>
-            <Box className="feature-box">
-              <Typography variant="h6" className="feature-title">
-                Recordatorios automáticos
-              </Typography>
-              <Typography variant="body1" className="feature-description">
-                La aplicación enviará recordatorios automáticos para que nadie olvide saldar sus deudas.
-              </Typography>
-            </Box>
-          </Box>
+          <Box className="features-section" sx={{ textAlign: 'center', marginBottom: 4 }}>
+  {/* Título centrado */}
+  <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: 4 }}>
+    ¿Por qué usar nuestro Administrador de Gastos?
+  </Typography>
+
+  {/* Contenedor de las características, alineado en columnas */}
+  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 3 }}>
+    <Box 
+      sx={{
+        backgroundColor: '#f5f5f5',
+        borderRadius: '12px',
+        padding: 3,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          boxShadow: '0 8px 12px rgba(0,0,0,0.2)',
+        },
+      }}
+    >
+      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 2 }}>
+        <i className="fas fa-users" style={{ marginRight: '8px' }}></i> Fácil de usar
+      </Typography>
+      <Typography variant="body1" sx={{ color: 'black', fontFamily: 'Lobster, cursive' }}>
+        Crea grupos, añade gastos y nuestro sistema se encargará de dividir todo de manera equitativa o personalizada.
+      </Typography>
+    </Box>
+
+    <Box 
+      sx={{
+        backgroundColor: '#f5f5f5',
+        borderRadius: '12px',
+        padding: 3,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          boxShadow: '0 8px 12px rgba(0,0,0,0.2)',
+        },
+      }}
+    >
+      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 2 }}>
+        <i className="fas fa-chart-line" style={{ marginRight: '8px' }}></i> Mantén el control
+      </Typography>
+      <Typography variant="body1" sx={{ color: 'black', fontFamily: 'Lobster, cursive' }}>
+        Lleva un registro detallado de tus gastos compartidos y sabe siempre cuánto te deben o cuánto debes.
+      </Typography>
+    </Box>
+
+    <Box 
+      sx={{
+        backgroundColor: '#f5f5f5',
+        borderRadius: '12px',
+        padding: 3,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          boxShadow: '0 8px 12px rgba(0,0,0,0.2)',
+        },
+      }}
+    >
+      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 2 }}>
+        <i className="fas fa-bell" style={{ marginRight: '8px' }}></i> Recordatorios automáticos
+      </Typography>
+      <Typography variant="body1" sx={{ color: 'black', fontFamily: 'Lobster, cursive' }}>
+        La aplicación enviará recordatorios automáticos para que nadie olvide saldar sus deudas.
+      </Typography>
+    </Box>
+  </Box>
+</Box>
+
+
+
 
           {/* Sección de comentarios */}
           <Box className="testimonials-section">
