@@ -1,30 +1,32 @@
 import React, { useState } from 'react';
-import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box, Alert, Link } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Importa el Link de react-router-dom
-import { blue } from '@mui/material/colors'; // Importa el color azul de MUI
-import EmailIcon from '@mui/icons-material/Email'; // Icono para el campo de email
-import LockIcon from '@mui/icons-material/Lock'; // Icono para el campo de contraseña
+import { Container, Typography, TextField, Button, Box, Alert, Link } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { blue } from '@mui/material/colors';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
 
 function Registro() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({ email: false, password: false, emailFormat: false, emailExists: false });
+  const [errors, setErrors] = useState({ email: false, password: false, emailFormat: false });
+  const [serverError, setServerError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
-    // Expresión regular para validar formato de email
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Resetea los errores antes de validar
-    let hasError = false;
-    setErrors({ email: false, password: false, emailFormat: false, emailExists: false });
 
-    // Validar si los campos están vacíos
+    setErrors({ email: false, password: false, emailFormat: false });
+    setServerError('');
+    setSuccessMessage('');
+
+    let hasError = false;
+
     if (!email) {
       setErrors((prev) => ({ ...prev, email: true }));
       hasError = true;
@@ -35,35 +37,29 @@ function Registro() {
       hasError = true;
     }
 
-    // Validar el formato del email si no está vacío
     if (email && !validateEmail(email)) {
       setErrors((prev) => ({ ...prev, emailFormat: true }));
       hasError = true;
     }
 
     if (!hasError) {
-      const appData = JSON.parse(localStorage.getItem('appData'));
-      const emailExists = appData.usuarios.some((usuario) => usuario.email === email);
+      try {
+        const response = await fetch(`${process.env.API_URL}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
 
-      if (emailExists) {
-        // Si el email ya existe, mostrar el error
-        setErrors((prev) => ({ ...prev, emailExists: true }));
-        return; // Evitar que el usuario se registre
+        if (response.ok) {
+          setSuccessMessage('¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...');
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          const errorData = await response.json();
+          setServerError(errorData.message || 'Ocurrió un error al registrarte.');
+        }
+      } catch (err) {
+        setServerError('Error de red. Intenta nuevamente más tarde.');
       }
-
-      // Crear un nuevo usuario con un id único
-      const nuevoUsuario = {
-        id: appData.usuarios.length + 1, // O usa alguna otra lógica para generar el ID
-        email,
-        password,
-      };
-
-      // Agregar el nuevo usuario al array de usuarios
-      appData.usuarios.push(nuevoUsuario);
-
-      // Guardar el objeto actualizado de nuevo en el localStorage
-      localStorage.setItem('appData', JSON.stringify(appData));
-      navigate('/login');
     }
   };
 
@@ -73,11 +69,15 @@ function Registro() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight: '100vh', // Hace que ocupe toda la altura de la ventana
-        backgroundColor: '#f4f6f8', // Fondo suave para el resto de la página
+        minHeight: '100vh',
+        backgroundColor: '#f4f6f8',
       }}
     >
-      <Container component="main" maxWidth="xs" sx={{ backgroundColor: '#e0e0e0', borderRadius: 2, boxShadow: 3, padding: 4 }}>
+      <Container
+        component="main"
+        maxWidth="xs"
+        sx={{ backgroundColor: '#e0e0e0', borderRadius: 2, boxShadow: 3, padding: 4 }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -86,7 +86,9 @@ function Registro() {
             width: '100%',
           }}
         >
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: blue[600] }}>¿Primera vez? ¡Regístrate!</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: blue[600] }}>
+            ¿Primera vez? ¡Regístrate!
+          </Typography>
           <Box
             component="form"
             noValidate
@@ -94,7 +96,7 @@ function Registro() {
               mt: 3,
               width: '100%',
             }}
-            onSubmit={handleSubmit} // Manejador del submit del formulario
+            onSubmit={handleSubmit}
           >
             <TextField
               margin="normal"
@@ -107,22 +109,16 @@ function Registro() {
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              error={errors.email || errors.emailFormat || errors.emailExists}
+              error={errors.email || errors.emailFormat}
               helperText={
                 errors.email
                   ? 'El email es requerido'
                   : errors.emailFormat
                   ? 'El formato del email no es válido'
-                  : errors.emailExists
-                  ? 'El email ya está registrado'
                   : ''
               }
               InputProps={{
-                startAdornment: <EmailIcon sx={{ color: blue[500], mr: 1 }} />, // Icono al inicio del campo
-              }}
-              sx={{
-                borderRadius: 1,
-                '& .MuiInputBase-root': { paddingLeft: 2 },
+                startAdornment: <EmailIcon sx={{ color: blue[500], mr: 1 }} />,
               }}
             />
 
@@ -140,44 +136,21 @@ function Registro() {
               error={errors.password}
               helperText={errors.password ? 'La contraseña es requerida' : ''}
               InputProps={{
-                startAdornment: <LockIcon sx={{ color: blue[500], mr: 1 }} />, // Icono al inicio del campo
-              }}
-              sx={{
-                borderRadius: 1,
-                '& .MuiInputBase-root': { paddingLeft: 2 },
+                startAdornment: <LockIcon sx={{ color: blue[500], mr: 1 }} />,
               }}
             />
 
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Recordar credenciales"
-            />
+            {serverError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {serverError}
+              </Alert>
+            )}
 
-<Alert
-  severity="info"
-  sx={{
-    width: 'auto', // Ajusta el ancho automáticamente según el contenido
-    maxWidth: '90%', // Establece un ancho máximo para la alerta
-    mt: 2,
-    mb: 2,
-    backgroundColor: '#e3f2fd', // Color de fondo personalizado
-    borderLeft: '3px solid #1e88e5', // Borde izquierdo personalizado
-    paddingLeft: '10px', // Reduce el padding izquierdo para mover el contenido hacia la izquierda
-  }}
-  action={
-    <Link to="/recuperar-cuenta" component={RouterLink} color="inherit">
-      ¡Toca acá!
-    </Link>
-  }
->
-  ¿Tienes cuenta y no te acuerdas la contraseña?{' '}
-</Alert>
-
-
-
-            <div className="alert alert-primary" role="alert" style={{ marginTop: 10 }}>
-              Si tengo cuenta <Link to="/login" className="alert-link">Selecciona acá</Link> para iniciar secion.
-            </div>
+            {successMessage && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                {successMessage}
+              </Alert>
+            )}
 
             <Button
               type="submit"
@@ -188,6 +161,13 @@ function Registro() {
             >
               Registrarse
             </Button>
+
+            <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+              ¿Ya tienes una cuenta?{' '}
+              <Link to="/login" component={RouterLink} color="primary">
+                Inicia sesión aquí
+              </Link>
+            </Typography>
           </Box>
         </Box>
       </Container>

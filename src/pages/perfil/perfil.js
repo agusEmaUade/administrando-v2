@@ -1,71 +1,104 @@
 import React, { useState, useEffect } from "react";
 import { Container, TextField, Button, Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { getUserIdFromJWT } from "../../../utils/jswDecode";
 
 function Perfil() {
-  // Estado para los datos del perfil
   const [profileData, setProfileData] = useState({
+    name: "",
     email: "",
     password: "",
   });
-
-  // Estados para controlar la habilitación del botón y las validaciones
   const [emailError, setEmailError] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // Para redirigir con el botón "Volver"
-
-  // Cargar la información del usuario desde localStorage al montar el componente
+  // Obtener datos del usuario desde el servidor
   useEffect(() => {
-    const userLogin = JSON.parse(localStorage.getItem("userLogin"));
-    if (userLogin) {
-      setProfileData({
-        email: userLogin.email,
-        password: userLogin.password,
-      });
-    }
-  }, []);
+    const token = localStorage.getItem("userToken");
+    const userID = JSON.parse(localStorage.getItem("userLogin"))?.id;
 
-  // Función para manejar los cambios en los inputs
+    if (!token || !userID) {
+      navigate("/login");
+      return;
+    }
+
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`${process.env.API_URL}/user/${userID}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          const data = await response.json();
+          setProfileData({
+            name: data.name,
+            email: data.mail,
+            password: "", // No mostramos la contraseña
+          });
+        } else {
+          alert("Error al obtener los datos del usuario.");
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Error al obtener los datos del usuario:", error);
+        alert("Error al conectar con el servidor.");
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+
+  // Validar y manejar cambios en los inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData((prevData) => ({ ...prevData, [name]: value }));
 
-    // Validar si el campo email tiene formato válido
     if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       setEmailError(!emailRegex.test(value));
     }
 
-    // Habilitar el botón de guardar solo si hay un cambio y no hay errores
-    const isComplete = profileData.email && profileData.password;
+    const isComplete = profileData.name && profileData.email && profileData.password;
     setIsSaveDisabled(!(isComplete && !emailError));
   };
 
-  // Función para manejar el evento de guardar
-  const handleSave = () => {
-    if (!isSaveDisabled) {
-      // Guardar los datos actualizados en localStorage
-      const updatedUser = {
-        id: JSON.parse(localStorage.getItem("userLogin")).id,
-        email: profileData.email,
-        password: profileData.password,
-      };
+  // Guardar datos
+  const handleSave = async () => {
+    const token = localStorage.getItem("userToken");
+    const userID = getUserIdFromJWT();
 
-      localStorage.setItem("userLogin", JSON.stringify(updatedUser));
+    if (!token || !userID) {
+      alert("No se encontró el token o ID del usuario.");
+      return;
+    }
 
-      const appData = JSON.parse(localStorage.getItem("appData"));
-      if (appData) {
-        const updatedUsers = appData.usuarios.map((user) =>
-          user.id === updatedUser.id ? updatedUser : user
-        );
-        localStorage.setItem(
-          "appData",
-          JSON.stringify({ ...appData, usuarios: updatedUsers })
-        );
+    try {
+      const response = await fetch(`${process.env.API_URL}/user/${userID}/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: profileData.name,
+          mail: profileData.email,
+          password: profileData.password,
+        }),
+      });
+
+      if (response.status === 200) {
+        alert("Perfil actualizado con éxito");
+        navigate("/dashboard");
+      } else {
+        alert("Error al actualizar el perfil.");
       }
-
-      alert("Perfil guardado con éxito");
+    } catch (error) {
+      console.error("Error al guardar el perfil:", error);
+      alert("Error al conectar con el servidor.");
     }
   };
 
@@ -74,6 +107,15 @@ function Perfil() {
       <Box sx={{ textAlign: "center", mb: 4 }}>
         <Typography variant="h4">Gestionar Perfil</Typography>
       </Box>
+
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Nombre"
+        name="name"
+        value={profileData.name}
+        onChange={handleInputChange}
+      />
 
       <TextField
         fullWidth
@@ -96,7 +138,6 @@ function Perfil() {
         onChange={handleInputChange}
       />
 
-      {/* Botones para guardar o volver */}
       <Box sx={{ mt: 4, display: "flex", justifyContent: "space-between" }}>
         <Button
           variant="contained"
@@ -109,7 +150,7 @@ function Perfil() {
         <Button
           variant="outlined"
           color="secondary"
-          onClick={() => navigate("/dashboard")} // Navegar a la página anterior
+          onClick={() => navigate("/dashboard")}
         >
           Volver
         </Button>

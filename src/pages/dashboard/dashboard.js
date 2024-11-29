@@ -11,57 +11,47 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField
+  TextField,
+  IconButton,
 } from '@mui/material';
-import { useNavigate } from "react-router-dom";
-import './dashboard.css'; // Estilos
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Ícono de usuario
+import { useNavigate } from 'react-router-dom';
+import { decodeJWT } from '../../utils/decodeJWT';
+import './dashboard.css';
 import NavBar from '../../components/navBar/navBar';
+import { getUserIdFromJWT } from '../../../utils/jswDecode';
 
 function Dashboard() {
-  
-  const navigate = useNavigate(); // Para redirigir
-  
-  // Estado para manejar la lista de proyectos
-  const [projects, setProjects] = useState([]);
-  const [userLogin, setUserLogin] = useState(null);
-  const [appData, setAppData] = useState(null);
+  const navigate = useNavigate();
 
-  // Estado para manejar el modal
-  const [open, setOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [user, setUser] = useState(null);
+  const [openProjectModal, setOpenProjectModal] = useState(false);
+  const [openUserModal, setOpenUserModal] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
   const [errors, setErrors] = useState({ name: false, description: false });
 
-  // Obtener datos de localStorage
   useEffect(() => {
-    //const storedUserLogin = JSON.parse(localStorage.getItem('userLogin'));
-    const storedAppData = JSON.parse(localStorage.getItem('appData'));
-
-    if (storedUserLogin && storedAppData) {
-      setUserLogin(storedUserLogin);
-      setAppData(storedAppData);
-      
-      // Filtrar los proyectos que incluyen al usuario logueado
-      const userProjects = storedAppData.proyectos.filter(project => 
-        project.usuarios.some(user => user.id === storedUserLogin.id)
-      );
-      setProjects(userProjects);
+    const token = localStorage.getItem('userToken');
+    if (token) {
+      const decodedUser = decodeJWT(token);
+      setUser(decodedUser);
+    } else {
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
-  // Función para manejar la apertura del modal
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  // Función para cerrar el modal
-  const handleClose = () => {
-    setOpen(false);
+  const handleOpenProjectModal = () => setOpenProjectModal(true);
+  const handleCloseProjectModal = () => {
+    setOpenProjectModal(false);
     setNewProject({ name: '', description: '' });
     setErrors({ name: false, description: false });
   };
 
-  // Función para agregar un nuevo proyecto
-  const handleSave = () => {
+  const handleOpenUserModal = () => setOpenUserModal(true);
+  const handleCloseUserModal = () => setOpenUserModal(false);
+
+  const handleSaveProject = async () => {
     if (!newProject.name || !newProject.description) {
       setErrors({
         name: !newProject.name,
@@ -70,35 +60,32 @@ function Dashboard() {
       return;
     }
 
-    // Crear el nuevo proyecto
-    const newProjectData = {
-      id: appData.proyectos.length + 1, // ID dinámico basado en la cantidad de proyectos actuales
-      titulo: newProject.name,
-      descripcion: newProject.description,
-      montoTotal: 0,
-      usuarios: [userLogin], // Asignar el usuario logueado como miembro del proyecto
-      tickets: []
-    };
+    try {
+      const userID = getUserIdFromJWT();
+      const response = await fetch(`${process.env.API_URL}/${userID}/proyect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+        },
+        body: JSON.stringify({
+          proyectName: newProject.name,
+          proyectDescription: newProject.description,
+        }),
+      });
 
-    // Actualizar el localStorage
-    const updatedAppData = {
-      ...appData,
-      proyectos: [...appData.proyectos, newProjectData]
-    };
+      if (!response.ok) {
+        throw new Error('Error al guardar el proyecto');
+      }
 
-    localStorage.setItem('appData', JSON.stringify(updatedAppData));
-    setAppData(updatedAppData); // Actualizar el estado con los nuevos datos
-
-    // Filtrar y actualizar la lista de proyectos del usuario logueado
-    const userProjects = updatedAppData.proyectos.filter(project =>
-      project.usuarios.some(user => user.id === userLogin.id)
-    );
-    setProjects(userProjects); // Actualizar los proyectos mostrados en pantalla
-
-    handleClose(); // Cierra el modal después de agregar el proyecto
+      const data = await response.json();
+      setProjects((prevProjects) => [...prevProjects, data]);
+      handleCloseProjectModal();
+    } catch (error) {
+      console.error('Error al guardar el proyecto:', error);
+    }
   };
 
-  // Manejar los cambios en el formulario del modal
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProject((prevData) => ({ ...prevData, [name]: value }));
@@ -107,40 +94,44 @@ function Dashboard() {
   return (
     <div>
       <NavBar />
+      {/* Ícono de usuario en la esquina superior derecha */}
+      <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
+        <IconButton onClick={handleOpenUserModal}>
+          <AccountCircleIcon fontSize="large" />
+        </IconButton>
+      </Box>
+
       <Container maxWidth="lg" sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', py: 5 }}>
-        {/* Renderizar tarjetas de proyectos */}
         {projects.map((project) => (
           <Card key={project.id} sx={{ mb: 3 }}>
             <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              {/* Nombre y descripción en la izquierda */}
               <Box>
-                <Typography variant="h5">{project.titulo}</Typography>
+                <Typography variant="h5">{project.proyectName}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {project.descripcion}
+                  {project.proyectDescription}
                 </Typography>
               </Box>
-              {/* Monto total en la derecha */}
-              <Typography variant="h6" sx={{ textAlign: 'right' }}>
-                ${project.montoTotal}
-              </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'flex-end' }}>
-              <Button size="small" variant="outlined" color="primary" onClick={() => navigate(`/detalle-proyecto/${project.id}`)}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                onClick={() => navigate(`/detalle-proyecto/${project.id}`)}
+              >
                 Ver Detalle
               </Button>
             </CardActions>
           </Card>
         ))}
-
-        {/* Botón para abrir el modal */}
         <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Button variant="contained" color="primary" onClick={handleOpen}>
+          <Button variant="contained" color="primary" onClick={handleOpenProjectModal}>
             Agregar nuevo proyecto
           </Button>
         </Box>
 
         {/* Modal para agregar proyecto */}
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={openProjectModal} onClose={handleCloseProjectModal}>
           <DialogTitle>Agregar nuevo proyecto</DialogTitle>
           <DialogContent>
             <TextField
@@ -166,11 +157,27 @@ function Dashboard() {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="secondary">
+            <Button onClick={handleCloseProjectModal} color="secondary">
               Cancelar
             </Button>
-            <Button onClick={handleSave} color="primary">
+            <Button onClick={handleSaveProject} color="primary">
               Guardar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal de usuario */}
+        <Dialog open={openUserModal} onClose={handleCloseUserModal}>
+          <DialogTitle>Opciones de Usuario</DialogTitle>
+          <DialogContent>
+            <Typography>Bienvenido, {user?.name || 'Usuario'}</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => navigate('/perfil/perfil')} color="primary">
+              Ir a mi Perfil
+            </Button>
+            <Button onClick={handleCloseUserModal} color="secondary">
+              Cerrar
             </Button>
           </DialogActions>
         </Dialog>

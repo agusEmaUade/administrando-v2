@@ -1,65 +1,59 @@
-// pages/RecuperarCuenta.js
 import React, { useState } from 'react';
 import { Container, Typography, TextField, Button, Box, Alert, Link, Snackbar } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
-function RecuperarCuenta() {
+function EmailValidation() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState({ email: false, emailFormat: false });
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [serverError, setServerError] = useState('');
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
-    // Expresión regular para validar formato de email
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Reiniciar errores
     setError({ email: false, emailFormat: false });
+    setServerError('');
+    setOpenSnackbar(false);
 
-    // Validar si el campo está vacío
     if (!email) {
       setError((prev) => ({ ...prev, email: true }));
       return;
     }
 
-    // Validar formato del email
     if (!validateEmail(email)) {
       setError((prev) => ({ ...prev, emailFormat: true }));
       return;
     }
 
-    // Si las validaciones son correctas, mostrar el snackbar (pop-up)
-    setOpenSnackbar(true);
-  };
+    try {
+      const response = await fetch('/user/password-mail', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mail: email }),
+      });
 
-  const handleSnackbarClose = () => {
-    setOpenSnackbar(false);
+      if (response.ok) {
+        setOpenSnackbar(true);
+        setTimeout(() => navigate('/cambiar-password'), 2000);
+      } else {
+        const errorData = await response.json();
+        setServerError(errorData.message || 'Error al enviar el correo.');
+      }
+    } catch (err) {
+      setServerError('Error de red. Intenta nuevamente.');
+    }
   };
 
   return (
     <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mt: 8,
-        }}
-      >
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8 }}>
         <Typography variant="h5">Recuperar Cuenta</Typography>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleSubmit}
-          sx={{
-            mt: 3,
-            width: '100%',
-          }}
-        >
+        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
           <TextField
             margin="normal"
             required
@@ -81,6 +75,12 @@ function RecuperarCuenta() {
             }
           />
 
+          {serverError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {serverError}
+            </Alert>
+          )}
+
           <Alert
             severity="info"
             sx={{ width: '100%', mt: 2, mb: 2 }}
@@ -93,22 +93,14 @@ function RecuperarCuenta() {
             ¿No recuerdas tu contraseña? Ingresa tu email para recibir instrucciones.
           </Alert>
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2, mb: 2 }}
-          >
+          <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 2, mb: 2 }}>
             Enviar Instrucciones
           </Button>
         </Box>
 
-        {/* Snackbar para mostrar el mensaje de confirmación */}
         <Snackbar
           open={openSnackbar}
           autoHideDuration={4000}
-          onClose={handleSnackbarClose}
           message={`Se ha enviado un mail a ${email} con las instrucciones`}
         />
       </Box>
@@ -116,4 +108,4 @@ function RecuperarCuenta() {
   );
 }
 
-export default RecuperarCuenta;
+export default EmailValidation;
