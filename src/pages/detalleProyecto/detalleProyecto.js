@@ -9,6 +9,7 @@ import {
   Grid,
   Card,
   CardContent,
+  Modal,
 } from "@mui/material";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -22,6 +23,7 @@ import {
   MonetizationOn as MonetizationOnIcon,
   ArrowBack as ArrowBackIcon,
   Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
 } from "@mui/icons-material";
 
 function DetalleProyecto() {
@@ -32,6 +34,8 @@ function DetalleProyecto() {
   const [members, setMembers] = useState([]);
   const [openUserModal, setOpenUserModal] = useState(false);
   const [openExpenseModal, setOpenExpenseModal] = useState(false);
+  const [openDetailModal, setOpenDetailModal] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
 
   useEffect(() => {
     const storedAppData = JSON.parse(localStorage.getItem("appData"));
@@ -46,7 +50,7 @@ function DetalleProyecto() {
 
         const projectExpenses = foundProject.tickets.map((ticket) => ({
           id: ticket.id,
-          concept: `Gasto del ${ticket.fecha}`,
+          concept: ticket.concepto || `Gasto del ${ticket.fecha}`,
           amount: ticket.monto,
           usuariosParticipantes: ticket.usuariosParticipantes || [],
         }));
@@ -74,6 +78,16 @@ function DetalleProyecto() {
   const handleCloseUserModal = () => setOpenUserModal(false);
   const handleOpenExpenseModal = () => setOpenExpenseModal(true);
   const handleCloseExpenseModal = () => setOpenExpenseModal(false);
+
+  const handleOpenDetailModal = (expense) => {
+    setSelectedExpense(expense);
+    setOpenDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setOpenDetailModal(false);
+    setSelectedExpense(null);
+  };
 
   const handleAddUser = (email) => {
     const storedAppData = JSON.parse(localStorage.getItem("appData"));
@@ -118,6 +132,7 @@ function DetalleProyecto() {
       {
         id: Date.now(),
         monto: newExpense.amount,
+        concepto: newExpense.concept, // Agrega el concepto al ticket
         fecha: new Date().toISOString().split("T")[0],
         usuariosParticipantes: newExpense.users || [],
       },
@@ -132,7 +147,7 @@ function DetalleProyecto() {
     setExpenses(
       updatedTickets.map((ticket) => ({
         id: ticket.id,
-        concept: `Gasto del ${ticket.fecha}`,
+        concept: ticket.concepto || `Gasto del ${ticket.fecha}`,
         amount: ticket.monto,
         usuariosParticipantes: ticket.usuariosParticipantes || [],
       }))
@@ -153,19 +168,27 @@ function DetalleProyecto() {
     const updatedExpenses = expenses.filter(
       (expense) => expense.id !== expenseId
     );
-    setExpenses(updatedExpenses);
 
-    const storedAppData = JSON.parse(localStorage.getItem("appData"));
+    const updatedTickets = project.tickets.filter(
+      (ticket) => ticket.id !== expenseId
+    );
+
     const updatedProject = {
       ...project,
-      tickets: updatedExpenses.map((expense) => ({
-        id: expense.id,
-        monto: expense.amount,
-        fecha: expense.concept.split(" del ")[1],
-        usuariosParticipantes: expense.usuariosParticipantes,
-      })),
+      tickets: updatedTickets,
     };
 
+    setProject(updatedProject);
+    setExpenses(
+      updatedTickets.map((ticket) => ({
+        id: ticket.id,
+        concept: ticket.concepto || `Gasto del ${ticket.fecha}`,
+        amount: ticket.monto,
+        usuariosParticipantes: ticket.usuariosParticipantes || [],
+      }))
+    );
+
+    const storedAppData = JSON.parse(localStorage.getItem("appData"));
     const updatedAppData = {
       ...storedAppData,
       proyectos: storedAppData.proyectos.map((proj) =>
@@ -202,9 +225,14 @@ function DetalleProyecto() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Agregar Gasto">
-            <IconButton color="primary" onClick={handleOpenExpenseModal}>
-              <MonetizationOnIcon />
-            </IconButton>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconButton color="primary" onClick={handleOpenExpenseModal}>
+                <MonetizationOnIcon />
+              </IconButton>
+              <Typography variant="body1" sx={{ ml: 1 }}>
+                Agregar
+              </Typography>
+            </Box>
           </Tooltip>
         </Box>
 
@@ -213,14 +241,24 @@ function DetalleProyecto() {
           {expenses.map((expense) => (
             <Box key={expense.id} sx={{ mb: 2 }}>
               <ExpenseCard expense={expense} />
-              <Tooltip title="Eliminar Gasto">
-                <IconButton
-                  color="secondary"
-                  onClick={() => handleDeleteExpense(expense.id)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Tooltip title="Ver Detalles del Gasto">
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleOpenDetailModal(expense)}
+                  >
+                    <VisibilityIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Eliminar Gasto">
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDeleteExpense(expense.id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
           ))}
 
@@ -272,6 +310,51 @@ function DetalleProyecto() {
           onClose={handleCloseExpenseModal}
           onAddExpense={handleAddExpense}
         />
+        <Modal
+          open={openDetailModal}
+          onClose={handleCloseDetailModal}
+          aria-labelledby="expense-detail-title"
+          aria-describedby="expense-detail-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography id="expense-detail-title" variant="h6" component="h2">
+              Detalles del Gasto
+            </Typography>
+            {selectedExpense && (
+              <>
+                <Typography id="expense-detail-description" sx={{ mt: 2 }}>
+                  Concepto: {selectedExpense.concept}
+                </Typography>
+                <Typography sx={{ mt: 1 }}>
+                  Monto: ${selectedExpense.amount.toFixed(2)} - {selectedExpense.concept}
+                </Typography>
+                <Typography sx={{ mt: 1 }}>Usuarios Participantes:</Typography>
+                <ul>
+                  {selectedExpense.usuariosParticipantes.map((userId) => {
+                    const user = members.find((member) => member.id === userId);
+                    return (
+                      <li key={userId}>
+                        {user ? user.name : "Usuario desconocido"}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+          </Box>
+        </Modal>
       </Container>
     </div>
   );
