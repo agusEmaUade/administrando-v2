@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Typography, Box, IconButton, Tooltip } from "@mui/material";
+import { Container, Typography, Box, IconButton, Tooltip, Grid, Card, CardContent } from "@mui/material";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import ExpenseCard from "../../components/expenseCard"; // Importa el componente de gastos
@@ -44,31 +44,17 @@ function DetalleProyecto() {
 
         const projectMembers = foundProject.usuarios.map((user) => ({
           name: user.email,
-          amountOwed: calculateAmountOwed(user.id, foundProject.tickets),
         }));
         setMembers(projectMembers);
       }
     }
   }, [id]);
 
-  const calculateAmountOwed = (userId, tickets) => {
-    let totalOwed = 0;
-    tickets.forEach((ticket) => {
-      if (ticket.usuariosParticipantes.some((u) => u.id === userId)) {
-        totalOwed += ticket.monto;
-      }
-    });
-    return totalOwed;
-  };
-
   const downloadExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(expenses);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Gastos");
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, "gastos-proyecto.xlsx");
   };
@@ -96,7 +82,7 @@ function DetalleProyecto() {
           email: userFound.email,
         });
         setProject(updatedProject);
-        setMembers([...members, { name: userFound.email, amountOwed: 0 }]);
+        setMembers([...members, { name: userFound.email }]);
 
         const updatedAppData = {
           ...storedAppData,
@@ -106,8 +92,6 @@ function DetalleProyecto() {
         };
         localStorage.setItem("appData", JSON.stringify(updatedAppData));
       }
-    } else {
-      // Lógica para invitar al usuario si no se encuentra en la base de datos
     }
 
     handleCloseUserModal();
@@ -117,7 +101,6 @@ function DetalleProyecto() {
     const updatedExpenses = [...expenses, { id: Date.now(), ...newExpense }];
     setExpenses(updatedExpenses);
 
-    // Actualizar el proyecto en localStorage
     const storedAppData = JSON.parse(localStorage.getItem("appData"));
     const updatedProject = {
       ...project,
@@ -127,10 +110,16 @@ function DetalleProyecto() {
           id: Date.now(),
           monto: newExpense.amount,
           fecha: new Date().toISOString().split("T")[0],
-          usuariosParticipantes: [],
+          usuariosParticipantes: [], // Aquí debes agregar los usuarios que participen en el gasto
         },
       ],
     };
+
+    const updatedMembers = updatedProject.usuarios.map((user) => ({
+      name: user.email,
+    }));
+
+    setMembers(updatedMembers);
 
     const updatedAppData = {
       ...storedAppData,
@@ -143,14 +132,15 @@ function DetalleProyecto() {
     handleCloseExpenseModal();
   };
 
-  // Calcular el total acumulado de los gastos
   const totalAmount = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+
+  // Calculamos el monto que debe cada integrante
+  const amountPerMember = members.length > 0 ? totalAmount / members.length : 0;
 
   return (
     <div>
       <NavBar />
       <Container maxWidth="lg" sx={{ mt: 5 }}>
-        {/* Icono de flecha para volver */}
         <IconButton onClick={() => navigate("/dashboard")} color="primary">
           <ArrowBackIcon />
         </IconButton>
@@ -158,7 +148,6 @@ function DetalleProyecto() {
           Detalle del Proyecto: {project?.titulo}
         </Typography>
 
-        {/* Botones de acción en la parte superior */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
           <Tooltip title="Agregar Usuario">
             <IconButton color="primary" onClick={handleOpenUserModal}>
@@ -177,35 +166,48 @@ function DetalleProyecto() {
           </Tooltip>
         </Box>
 
-        {/* Lista de gastos */}
         <Box sx={{ mt: 3 }}>
           <Typography variant="h5">Gastos</Typography>
           {expenses.map((expense) => (
             <ExpenseCard key={expense.id} expense={expense} />
           ))}
 
-          {/* Mostrar total acumulado de los gastos */}
           <Typography variant="h6" sx={{ mt: 3, fontWeight: "bold" }}>
             Total Acumulado: ${totalAmount.toFixed(2)}
           </Typography>
+
+          {/* Aquí agregamos la deuda dividida entre los miembros */}
+          <Typography variant="h6" sx={{ mt: 2, fontWeight: "bold" }}>
+            Total por persona: ${amountPerMember.toFixed(2)}
+          </Typography>
+          
         </Box>
 
-        {/* Tabla de integrantes */}
         <Box sx={{ mt: 5 }}>
           <Typography variant="h5" gutterBottom>
             Integrantes del Proyecto
           </Typography>
-          <MemberTable members={members} />
+          <Grid container spacing={2}>
+            {members.map((member, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ backgroundColor: "#f0f0f0" }}> {/* Haciendo el fondo más gris */}
+                  <CardContent>
+                    <Typography variant="h6">{member.name}</Typography>
+                    <Typography variant="body1">
+                      Deuda: ${amountPerMember.toFixed(2)} {/* Mostramos la misma deuda para todos */}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
 
-        {/* Modal para agregar usuario */}
         <AddUserModal
           open={openUserModal}
           onClose={handleCloseUserModal}
           onAddUser={handleAddUser}
         />
-
-        {/* Modal para agregar gasto */}
         <AddExpenseModal
           open={openExpenseModal}
           onClose={handleCloseExpenseModal}
