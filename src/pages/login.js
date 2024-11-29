@@ -12,6 +12,35 @@ function Login() {
   const [errorPassword, setErrorPassword] = useState(false);
   const navigate = useNavigate(); // Inicializa useNavigate para redireccionar
 
+  const handleLogIn = async () => {
+
+    try{
+
+      const response = await fetch( ${API_URL}/user", {//aca va el endpoint
+        method: "POST",
+        headers: {
+          "Content-Type" : "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      })
+
+      if (response.ok){
+        const token = response.text();
+        await localStorage.setItem("userToken", token);
+        navigate("/dashboard");
+      }
+
+    }catch(erros)
+    {
+      throw Error("Error en login" , errors);
+    }
+
+
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault(); // Previene la recarga de la página
 
@@ -32,6 +61,7 @@ function Login() {
       setErrorPassword(false);
     }
 
+    /*
     const bd = JSON.parse(localStorage.getItem("appData"));
     const usuarioMach = bd.usuarios.find(u => u.email === email && u.password === password);
     // Si los campos están llenos y las credenciales son correctas
@@ -41,7 +71,7 @@ function Login() {
     } else if (valid) {
       alert('Usuario o contraseña incorrecta');
     }
-  };
+  };*/
 
   return (
     <Box
@@ -126,9 +156,8 @@ function Login() {
             </Box>
             
             <div className="alert alert-primary" role="alert" style={{ marginTop: 10 }}>
-  Aun no tenes cuenta? <Link to="/registro" style={{ textDecoration: 'none', color: blue[500] }}>Selecciona acá</Link> para crear una cuenta.
-</div>
-
+              Aun no tenes cuenta? <Link to="/registro" className="alert-link">Selecciona acá</Link> para crear una cuenta.
+            </div>
             
             <Button
               type="submit"

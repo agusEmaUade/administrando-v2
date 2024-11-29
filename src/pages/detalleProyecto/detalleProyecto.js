@@ -26,6 +26,7 @@ function DetalleProyecto() {
 
   useEffect(() => {
     const storedAppData = JSON.parse(localStorage.getItem("appData"));
+    //console.log("AppData : ", storedAppData);
 
     if (storedAppData) {
       const foundProject = storedAppData.proyectos.find(

@@ -33,7 +33,7 @@ function Dashboard() {
 
   // Obtener datos de localStorage
   useEffect(() => {
-    const storedUserLogin = JSON.parse(localStorage.getItem('userLogin'));
+    //const storedUserLogin = JSON.parse(localStorage.getItem('userLogin'));
     const storedAppData = JSON.parse(localStorage.getItem('appData'));
 
     if (storedUserLogin && storedAppData) {
