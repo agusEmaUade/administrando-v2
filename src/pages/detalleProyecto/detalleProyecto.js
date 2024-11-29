@@ -296,9 +296,7 @@ function DetalleProyecto() {
                     <Card sx={{ backgroundColor: "#ffffffdd", borderRadius: 4, boxShadow: 3 }}>
                       <CardContent>
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{member.name}</Typography>
-                        <Typography variant="body2">
-                          Total Aportado: ${memberTotal.toFixed(2)}
-                        </Typography>
+                        
                       </CardContent>
                     </Card>
                   </Grid>
