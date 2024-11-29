@@ -175,9 +175,7 @@ function Registro() {
 
 
 
-            <div className="alert alert-primary" role="alert" style={{ marginTop: 10 }}>
-              Aún no tienes cuenta? <Link to="/registro" className="alert-link">Selecciona acá</Link> para crear una cuenta.
-            </div>
+           
 
             <Button
               type="submit"
