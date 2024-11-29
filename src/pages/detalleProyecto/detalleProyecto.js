@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Typography, Box, IconButton, Tooltip, Grid, Card, CardContent } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  IconButton,
+  Tooltip,
+  Grid,
+  Card,
+  CardContent,
+} from "@mui/material";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import ExpenseCard from "../../components/expenseCard"; // Importa el componente de gastos
-import AddUserModal from "../../components/addUserModal"; // Importa el nuevo componente de modal
-import AddExpenseModal from "../../components/addExpenseModal"; // Importa el nuevo componente de modal
+import ExpenseCard from "../../components/expenseCard";
+import AddUserModal from "../../components/addUserModal";
+import AddExpenseModal from "../../components/addExpenseModal";
 import NavBar from "../../components/navBar/navBar";
 import {
   AddReaction as AddReactionIcon,
   AttachFile as AttachFileIcon,
   MonetizationOn as MonetizationOnIcon,
-  ArrowBack as ArrowBackIcon, // Importar ícono de flecha
-  Delete as DeleteIcon, // Importar ícono de eliminación
-} from "@mui/icons-material"; // Importar íconos de Material-UI
+  ArrowBack as ArrowBackIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 
 function DetalleProyecto() {
   const { id } = useParams();
@@ -39,12 +48,12 @@ function DetalleProyecto() {
           id: ticket.id,
           concept: `Gasto del ${ticket.fecha}`,
           amount: ticket.monto,
-          usuariosParticipantes: ticket.usuariosParticipantes || [], // Asegura que sea un array vacío si no existe
+          usuariosParticipantes: ticket.usuariosParticipantes || [],
         }));
         setExpenses(projectExpenses);
 
         const projectMembers = foundProject.usuarios.map((user) => ({
-          id: user.id, // Asumimos que cada miembro tiene un id único
+          id: user.id,
           name: user.email,
         }));
         setMembers(projectMembers);
@@ -100,22 +109,34 @@ function DetalleProyecto() {
   };
 
   const handleAddExpense = (newExpense) => {
-    const updatedExpenses = [...expenses, { id: Date.now(), ...newExpense }];
-    setExpenses(updatedExpenses);
+    if (!project || !project.tickets) return;
 
     const storedAppData = JSON.parse(localStorage.getItem("appData"));
+
+    const updatedTickets = [
+      ...project.tickets,
+      {
+        id: Date.now(),
+        monto: newExpense.amount,
+        fecha: new Date().toISOString().split("T")[0],
+        usuariosParticipantes: newExpense.users || [],
+      },
+    ];
+
     const updatedProject = {
       ...project,
-      tickets: [
-        ...project.tickets,
-        {
-          id: Date.now(),
-          monto: newExpense.amount,
-          fecha: new Date().toISOString().split("T")[0],
-          usuariosParticipantes: newExpense.users || [], // Los usuarios que participaron en el gasto
-        },
-      ],
+      tickets: updatedTickets,
     };
+
+    setProject(updatedProject);
+    setExpenses(
+      updatedTickets.map((ticket) => ({
+        id: ticket.id,
+        concept: `Gasto del ${ticket.fecha}`,
+        amount: ticket.monto,
+        usuariosParticipantes: ticket.usuariosParticipantes || [],
+      }))
+    );
 
     const updatedAppData = {
       ...storedAppData,
@@ -128,9 +149,10 @@ function DetalleProyecto() {
     handleCloseExpenseModal();
   };
 
-  // Función para eliminar un gasto
   const handleDeleteExpense = (expenseId) => {
-    const updatedExpenses = expenses.filter((expense) => expense.id !== expenseId);
+    const updatedExpenses = expenses.filter(
+      (expense) => expense.id !== expenseId
+    );
     setExpenses(updatedExpenses);
 
     const storedAppData = JSON.parse(localStorage.getItem("appData"));
@@ -139,7 +161,7 @@ function DetalleProyecto() {
       tickets: updatedExpenses.map((expense) => ({
         id: expense.id,
         monto: expense.amount,
-        fecha: expense.concept.split(" del ")[1], // Extraer la fecha del concepto
+        fecha: expense.concept.split(" del ")[1],
         usuariosParticipantes: expense.usuariosParticipantes,
       })),
     };
@@ -155,8 +177,6 @@ function DetalleProyecto() {
   };
 
   const totalAmount = expenses.reduce((acc, expense) => acc + expense.amount, 0);
-
-  // Calculamos el monto que debe cada integrante
   const amountPerMember = members.length > 0 ? totalAmount / members.length : 0;
 
   return (
@@ -219,7 +239,6 @@ function DetalleProyecto() {
           </Typography>
           <Grid container spacing={2}>
             {members.map((member, index) => {
-              // Calcular el total aportado por cada miembro basado en los tickets del proyecto
               const memberTotal = expenses.reduce((acc, expense) => {
                 if (expense.usuariosParticipantes.includes(member.id)) {
                   return acc + expense.amount;
@@ -232,7 +251,9 @@ function DetalleProyecto() {
                   <Card sx={{ backgroundColor: "#f0f0f0" }}>
                     <CardContent>
                       <Typography variant="h6">{member.name}</Typography>
-                      <Typography variant="body2">Total Aportado: ${memberTotal.toFixed(2)}</Typography>
+                      <Typography variant="body2">
+                        Total Aportado: ${memberTotal.toFixed(2)}
+                      </Typography>
                     </CardContent>
                   </Card>
                 </Grid>
