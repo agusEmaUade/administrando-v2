@@ -4,7 +4,6 @@ import { Container, Typography, Box, IconButton, Tooltip, Grid, Card, CardConten
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import ExpenseCard from "../../components/expenseCard"; // Importa el componente de gastos
-import MemberTable from "../../components/memberTable"; // Importa el nuevo componente de tabla
 import AddUserModal from "../../components/addUserModal"; // Importa el nuevo componente de modal
 import AddExpenseModal from "../../components/addExpenseModal"; // Importa el nuevo componente de modal
 import NavBar from "../../components/navBar/navBar";
@@ -13,6 +12,7 @@ import {
   AttachFile as AttachFileIcon,
   MonetizationOn as MonetizationOnIcon,
   ArrowBack as ArrowBackIcon, // Importar ícono de flecha
+  Delete as DeleteIcon, // Importar ícono de eliminación
 } from "@mui/icons-material"; // Importar íconos de Material-UI
 
 function DetalleProyecto() {
@@ -39,10 +39,12 @@ function DetalleProyecto() {
           id: ticket.id,
           concept: `Gasto del ${ticket.fecha}`,
           amount: ticket.monto,
+          usuariosParticipantes: ticket.usuariosParticipantes || [], // Asegura que sea un array vacío si no existe
         }));
         setExpenses(projectExpenses);
 
         const projectMembers = foundProject.usuarios.map((user) => ({
+          id: user.id, // Asumimos que cada miembro tiene un id único
           name: user.email,
         }));
         setMembers(projectMembers);
@@ -82,7 +84,7 @@ function DetalleProyecto() {
           email: userFound.email,
         });
         setProject(updatedProject);
-        setMembers([...members, { name: userFound.email }]);
+        setMembers([...members, { id: userFound.id, name: userFound.email }]);
 
         const updatedAppData = {
           ...storedAppData,
@@ -110,16 +112,10 @@ function DetalleProyecto() {
           id: Date.now(),
           monto: newExpense.amount,
           fecha: new Date().toISOString().split("T")[0],
-          usuariosParticipantes: [], // Aquí debes agregar los usuarios que participen en el gasto
+          usuariosParticipantes: newExpense.users || [], // Los usuarios que participaron en el gasto
         },
       ],
     };
-
-    const updatedMembers = updatedProject.usuarios.map((user) => ({
-      name: user.email,
-    }));
-
-    setMembers(updatedMembers);
 
     const updatedAppData = {
       ...storedAppData,
@@ -130,6 +126,32 @@ function DetalleProyecto() {
 
     localStorage.setItem("appData", JSON.stringify(updatedAppData));
     handleCloseExpenseModal();
+  };
+
+  // Función para eliminar un gasto
+  const handleDeleteExpense = (expenseId) => {
+    const updatedExpenses = expenses.filter((expense) => expense.id !== expenseId);
+    setExpenses(updatedExpenses);
+
+    const storedAppData = JSON.parse(localStorage.getItem("appData"));
+    const updatedProject = {
+      ...project,
+      tickets: updatedExpenses.map((expense) => ({
+        id: expense.id,
+        monto: expense.amount,
+        fecha: expense.concept.split(" del ")[1], // Extraer la fecha del concepto
+        usuariosParticipantes: expense.usuariosParticipantes,
+      })),
+    };
+
+    const updatedAppData = {
+      ...storedAppData,
+      proyectos: storedAppData.proyectos.map((proj) =>
+        proj.id === updatedProject.id ? updatedProject : proj
+      ),
+    };
+
+    localStorage.setItem("appData", JSON.stringify(updatedAppData));
   };
 
   const totalAmount = expenses.reduce((acc, expense) => acc + expense.amount, 0);
@@ -169,18 +191,26 @@ function DetalleProyecto() {
         <Box sx={{ mt: 3 }}>
           <Typography variant="h5">Gastos</Typography>
           {expenses.map((expense) => (
-            <ExpenseCard key={expense.id} expense={expense} />
+            <Box key={expense.id} sx={{ mb: 2 }}>
+              <ExpenseCard expense={expense} />
+              <Tooltip title="Eliminar Gasto">
+                <IconButton
+                  color="secondary"
+                  onClick={() => handleDeleteExpense(expense.id)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
           ))}
 
           <Typography variant="h6" sx={{ mt: 3, fontWeight: "bold" }}>
             Total Acumulado: ${totalAmount.toFixed(2)}
           </Typography>
 
-          {/* Aquí agregamos la deuda dividida entre los miembros */}
           <Typography variant="h6" sx={{ mt: 2, fontWeight: "bold" }}>
             Total por persona: ${amountPerMember.toFixed(2)}
           </Typography>
-          
         </Box>
 
         <Box sx={{ mt: 5 }}>
@@ -188,18 +218,26 @@ function DetalleProyecto() {
             Integrantes del Proyecto
           </Typography>
           <Grid container spacing={2}>
-            {members.map((member, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card sx={{ backgroundColor: "#f0f0f0" }}> {/* Haciendo el fondo más gris */}
-                  <CardContent>
-                    <Typography variant="h6">{member.name}</Typography>
-                    <Typography variant="body1">
-                      Deuda: ${amountPerMember.toFixed(2)} {/* Mostramos la misma deuda para todos */}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {members.map((member, index) => {
+              // Calcular el total aportado por cada miembro basado en los tickets del proyecto
+              const memberTotal = expenses.reduce((acc, expense) => {
+                if (expense.usuariosParticipantes.includes(member.id)) {
+                  return acc + expense.amount;
+                }
+                return acc;
+              }, 0);
+
+              return (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card sx={{ backgroundColor: "#f0f0f0" }}>
+                    <CardContent>
+                      <Typography variant="h6">{member.name}</Typography>
+                      <Typography variant="body2">Total Aportado: ${memberTotal.toFixed(2)}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
           </Grid>
         </Box>
 
