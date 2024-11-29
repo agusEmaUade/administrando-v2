@@ -126,8 +126,9 @@ function Login() {
             </Box>
             
             <div className="alert alert-primary" role="alert" style={{ marginTop: 10 }}>
-              Aun no tenes cuenta? <Link to="/registro" className="alert-link">Selecciona acá</Link> para crear una cuenta.
-            </div>
+  Aun no tenes cuenta? <Link to="/registro" style={{ textDecoration: 'none', color: blue[500] }}>Selecciona acá</Link> para crear una cuenta.
+</div>
+
             
             <Button
               type="submit"

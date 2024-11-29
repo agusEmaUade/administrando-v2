@@ -17,7 +17,7 @@ import {
 
 function DetalleProyecto() {
   const { id } = useParams();
-  const navigate = useNavigate(); // Inicializa el hook para la navegación
+  const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [members, setMembers] = useState([]);
@@ -143,6 +143,9 @@ function DetalleProyecto() {
     handleCloseExpenseModal();
   };
 
+  // Calcular el total acumulado de los gastos
+  const totalAmount = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+
   return (
     <div>
       <NavBar />
@@ -178,8 +181,13 @@ function DetalleProyecto() {
         <Box sx={{ mt: 3 }}>
           <Typography variant="h5">Gastos</Typography>
           {expenses.map((expense) => (
-            <ExpenseCard key={expense.id} expense={expense} /> // Usar el componente de gastos aquí
+            <ExpenseCard key={expense.id} expense={expense} />
           ))}
+
+          {/* Mostrar total acumulado de los gastos */}
+          <Typography variant="h6" sx={{ mt: 3, fontWeight: "bold" }}>
+            Total Acumulado: ${totalAmount.toFixed(2)}
+          </Typography>
         </Box>
 
         {/* Tabla de integrantes */}
@@ -187,8 +195,7 @@ function DetalleProyecto() {
           <Typography variant="h5" gutterBottom>
             Integrantes del Proyecto
           </Typography>
-          <MemberTable members={members} />{" "}
-          {/* Usar el nuevo componente de tabla aquí */}
+          <MemberTable members={members} />
         </Box>
 
         {/* Modal para agregar usuario */}
