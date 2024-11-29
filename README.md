@@ -1,3 +1,141 @@
+#ENDPOINTS
+-------------------------------------------------
+
+LOGIN
+POST /login
+
+Body
+{
+"email":String,
+"password:"String"
+}
+
+Response:
+JWT
+
+--------------------------------------------
+
+CREATE ACCOUNT
+POST /register
+
+Body
+{
+"email":String,
+"password:"String"
+}
+
+Response
+Status code 200
+
+--------------------------------------------
+GET USER BY ID
+GET user/:userID
+
+Params: userID
+
+Header
+Autorization = Berer token
+
+Response
+{
+"name":String,
+"mail:"String",
+"password":"String"
+}
+
+
+
+--------------------------------------------
+UPDATE USER (CHANGE PASSWORD) STEP 2
+PATCH user/password
+
+Body
+{
+"password:"String"
+}
+
+Response
+Status code 200
+
+
+--------------------------------------------
+
+UPDATE USER (CHANGE PASSWORD) STEP 1
+PATCH user/password-mail
+
+Body
+{
+"mail:"String"
+}
+
+Response
+Status code 200
+
+-------------------------------------------------
+
+UPDATE ALL USER DATA
+PATCH user/:userID/me
+Params: userID
+
+Header
+Autorization = Berer token
+
+Body
+{
+"name":String,
+"mail:"String",
+"password":"String"
+}
+
+Response
+Status code 200
+
+-------------------------------------------------
+CREATE PROYECT
+
+POST /:userID/proyect
+param = userID
+
+Header
+Autorization = Berer token
+
+Body:
+{
+"proyectName":String,
+"proyectDescription": String
+}
+
+Response
+Status 200
+
+-------------------------------------------------
+
+GET PROYECT DATA
+
+GET /:userID/proyect
+param = userID
+
+Header
+Autorization = Berer token
+
+Response
+{
+proyectMembers: [
+{
+userId: String
+name: String
+mail:String
+}
+]
+proyectMembersAmount: {[
+userId: String
+amount: number
+detail:String
+}
+]
+}
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
