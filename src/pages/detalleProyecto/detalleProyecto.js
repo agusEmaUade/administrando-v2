@@ -345,7 +345,7 @@ function DetalleProyecto() {
                   <Typography sx={{ mt: 1 }}>
                     Monto: ${selectedExpense.amount.toFixed(2)}
                   </Typography>
-                  <Typography sx={{ mt: 1 }}>Usuarios Participantes:</Typography>
+                  
                   <ul>
                     {selectedExpense.usuariosParticipantes.map((userId) => {
                       const user = members.find((member) => member.id === userId);
