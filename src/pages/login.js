@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Container, Typography, TextField, FormControlLabel, Checkbox, Button, Box } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom'; // Importa el Link de react-router-dom
-import { blue } from '@mui/material/colors'; // Importa el color azul de MUI
-import EmailIcon from '@mui/icons-material/Email'; // Icono para el campo de email
-import LockIcon from '@mui/icons-material/Lock'; // Icono para el campo de contraseña
+import { Link, useNavigate } from 'react-router-dom';
+import { blue } from '@mui/material/colors';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock'; 
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorEmail, setErrorEmail] = useState(false);
   const [errorPassword, setErrorPassword] = useState(false);
-  const navigate = useNavigate(); // Inicializa useNavigate para redireccionar
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault(); // Previene la recarga de la página
 
     // Validaciones de campos obligatorios
@@ -32,16 +32,29 @@ function Login() {
       setErrorPassword(false);
     }
 
-    const bd = JSON.parse(localStorage.getItem("appData"));
-    const usuarioMach = bd.usuarios.find(u => u.email === email && u.password === password);
-    // Si los campos están llenos y las credenciales son correctas
-    if (valid && usuarioMach) {
-      localStorage.setItem("userLogin", JSON.stringify(usuarioMach));
-      navigate('/dashboard');
-    } else if (valid) {
-      alert('Usuario o contraseña incorrecta');
+    if (valid) {
+      try {
+        const response = await fetch("http://localhost:8080/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("token", data.token); // Guarda el token en el localStorage
+      navigate("/dashboard"); // Redirige al dashboard
+    } else {
+      const errorData = await response.json();
+      alert(errorData.message || "Usuario o contraseña incorrectos");
     }
-  };
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    alert("Hubo un problema al conectarse al servidor.");
+  }
+}
+};
 
   return (
     <Box
