@@ -14,7 +14,7 @@ function RecuperarCuenta() {
     return regex.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Reiniciar errores
@@ -32,8 +32,24 @@ function RecuperarCuenta() {
       return;
     }
 
-    // Si las validaciones son correctas, mostrar el snackbar (pop-up)
-    setOpenSnackbar(true);
+    try {
+      // Realizar la llamada a la API
+      const response = await fetch('http://localhost:8080/api/recover-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar el correo. Inténtalo nuevamente.');
+      }
+
+      setOpenSnackbar(true);
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const handleSnackbarClose = () => {
