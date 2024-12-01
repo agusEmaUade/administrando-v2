@@ -36,6 +36,8 @@ function DetalleProyecto() {
   const [openExpenseModal, setOpenExpenseModal] = useState(false);
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [amountPerMember, setAmountPerMember] = useState(0);
   const token = localStorage.getItem("token");
 
   // Función para obtener datos del proyecto
@@ -102,6 +104,14 @@ function DetalleProyecto() {
           name: user.email,
         }));
         setMembers(projectMembers);
+
+        const countTotalAmount = projectExpenses.reduce(
+          (acc, expense) => acc + expense.amount,
+          0
+        );
+        setTotalAmount(countTotalAmount);
+        const countAmountPerMember = projectMembers.length > 0 ? countTotalAmount / projectMembers.length : 0;
+        setAmountPerMember(countAmountPerMember);
       }
     } catch (err) {
       alert(err.message);
@@ -300,16 +310,34 @@ function DetalleProyecto() {
       }
 
       await fetchProjectData();
+
+      const amountUpdate = totalAmount + newExpense.amount;
+      const projectUpdateResponse = await fetch(
+        `http://localhost:8080/api/project/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ montoTotal: amountUpdate }),
+        }
+      );
+  
+      if (!projectUpdateResponse.ok) {
+        throw new Error("Error al actualizar el monto del proyecto.");
+      }
+
       handleCloseExpenseModal();
     } catch (error) {
       alert(error.message);
     }
   };
 
-  const handleDeleteExpense = async (expenseId) => {
+  const handleDeleteExpense = async (expense) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/ticket/${expenseId}`,
+        `http://localhost:8080/api/ticket/${expense.id}`,
         {
           method: "DELETE",
           headers: {
@@ -321,18 +349,28 @@ function DetalleProyecto() {
       if (!response.ok) {
         throw new Error("Error al eliminar el ticket.");
       }
-
       await fetchProjectData();
+
+      const montoUpdate = totalAmount - expense.amount;
+      const projectUpdateResponse = await fetch(
+        `http://localhost:8080/api/project/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ montoTotal: montoUpdate }),
+        }
+      );
+  
+      if (!projectUpdateResponse.ok) {
+        throw new Error("Error al actualizar el monto del proyecto.");
+      }
     } catch (error) {
       alert(error.message);
     }
   };
-
-  const totalAmount = expenses.reduce(
-    (acc, expense) => acc + expense.amount,
-    0
-  );
-  const amountPerMember = members.length > 0 ? totalAmount / members.length : 0;
 
   return (
     <div>
@@ -404,7 +442,7 @@ function DetalleProyecto() {
                   <Tooltip title="Eliminar Gasto">
                     <IconButton
                       sx={{ color: "#ff1744" }}
-                      onClick={() => handleDeleteExpense(expense.id)}
+                      onClick={() => handleDeleteExpense(expense)}
                     >
                       <DeleteIcon />
                     </IconButton>
