@@ -24,6 +24,7 @@ import {
   ArrowBack as ArrowBackIcon,
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
+  CloudUpload as UploadIcon,
 } from "@mui/icons-material";
 
 function DetalleProyecto() {
@@ -110,7 +111,10 @@ function DetalleProyecto() {
           0
         );
         setTotalAmount(countTotalAmount);
-        const countAmountPerMember = projectMembers.length > 0 ? countTotalAmount / projectMembers.length : 0;
+        const countAmountPerMember =
+          projectMembers.length > 0
+            ? countTotalAmount / projectMembers.length
+            : 0;
         setAmountPerMember(countAmountPerMember);
       }
     } catch (err) {
@@ -189,9 +193,9 @@ function DetalleProyecto() {
         if (!allUserResponse.ok) {
           throw new Error("Error al obtener users.");
         }
-        
+
         const allUser = await allUserResponse.json();
-        const user = allUser.find(user => user.email === email);
+        const user = allUser.find((user) => user.email === email);
 
         const assignUserResponse = await fetch(
           `http://localhost:8080/api/project/${user.id}/assign`,
@@ -323,7 +327,7 @@ function DetalleProyecto() {
           body: JSON.stringify({ montoTotal: amountUpdate }),
         }
       );
-  
+
       if (!projectUpdateResponse.ok) {
         throw new Error("Error al actualizar el monto del proyecto.");
       }
@@ -363,12 +367,44 @@ function DetalleProyecto() {
           body: JSON.stringify({ montoTotal: montoUpdate }),
         }
       );
-  
+
       if (!projectUpdateResponse.ok) {
         throw new Error("Error al actualizar el monto del proyecto.");
       }
     } catch (error) {
       alert(error.message);
+    }
+  };
+
+  const handleUploadTicket = async (expense, file) => {
+    if (!file) {
+      console.error("No se seleccionó ningún archivo.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/ticket/${expense.id}/file`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al subir el ticket.");
+      }
+
+      const data = await response.json();
+      console.log("Ticket actualizado:", data);
+    } catch (error) {
+      console.error("Error al subir el ticket:", error.message);
     }
   };
 
@@ -445,6 +481,18 @@ function DetalleProyecto() {
                       onClick={() => handleDeleteExpense(expense)}
                     >
                       <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Subir Ticket">
+                    <IconButton sx={{ color: "#fff" }} component="label">
+                      <UploadIcon />
+                      <input
+                        type="file"
+                        hidden
+                        onChange={(e) =>
+                          handleUploadTicket(expense, e.target.files[0])
+                        }
+                      />
                     </IconButton>
                   </Tooltip>
                 </Box>
