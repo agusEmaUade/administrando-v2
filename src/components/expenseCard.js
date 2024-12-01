@@ -1,7 +1,6 @@
 // ExpenseCard.js
 import React from 'react';
 import { Card, CardContent, Typography, IconButton } from '@mui/material';
-import { Visibility } from '@mui/icons-material';
 
 const ExpenseCard = ({ expense }) => {
   return (
@@ -13,9 +12,6 @@ const ExpenseCard = ({ expense }) => {
             Monto: ${expense.amount}
           </Typography>
         </div>
-        <IconButton color="primary" aria-label="Ver detalle">
-          <Visibility />
-        </IconButton>
       </CardContent>
     </Card>
   );
