@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -11,42 +11,81 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField
-} from '@mui/material';
+  TextField,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import './dashboard.css';
-import NavBar from '../../components/navBar/navBar';
+import "./dashboard.css";
+import NavBar from "../../components/navBar/navBar";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [userLogin, setUserLogin] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [appData, setAppData] = useState(null);
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [newProject, setNewProject] = useState({ name: '', description: '' });
-  const [editProject, setEditProject] = useState({ name: '', description: '' });
+  const [newProject, setNewProject] = useState({ name: "", description: "" });
+  const [editProject, setEditProject] = useState({ name: "", description: "" });
   const [errors, setErrors] = useState({ name: false, description: false });
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const storedUserLogin = JSON.parse(localStorage.getItem('userLogin'));
-    const storedAppData = JSON.parse(localStorage.getItem('appData'));
+    const fetchProjects = async () => {
+      if (!token) {
+        alert("No se encontró el token de autenticación.");
+        return;
+      }
 
-    if (storedUserLogin && storedAppData) {
-      setUserLogin(storedUserLogin);
-      setAppData(storedAppData);
-      const userProjects = storedAppData.proyectos.filter(project => 
-        project.usuarios.some(user => user.id === storedUserLogin.id)
-      );
-      setProjects(userProjects);
-    }
-  }, []);
+      try {
+        const validateTokenResponse = await fetch(
+          "http://localhost:8080/api/validate-token",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!validateTokenResponse.ok) {
+          throw new Error("Error al validar el token.");
+        }
+
+        const validateTokenData = await validateTokenResponse.json();
+
+        const userId = validateTokenData.user.id;
+        setUserId(userId);
+
+        const projectsResponse = await fetch(
+          `http://localhost:8080/api/project/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!projectsResponse.ok) {
+          throw new Error("Error al obtener los proyectos del usuario.");
+        }
+
+        const projectsData = await projectsResponse.json();
+        setProjects(projectsData);
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+
+    fetchProjects();
+  }, [token]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    setNewProject({ name: '', description: '' });
+    setNewProject({ name: "", description: "" });
     setErrors({ name: false, description: false });
   };
 
@@ -59,11 +98,11 @@ function Dashboard() {
   const handleCloseEdit = () => {
     setOpenEdit(false);
     setSelectedProject(null);
-    setEditProject({ name: '', description: '' });
+    setEditProject({ name: "", description: "" });
     setErrors({ name: false, description: false });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!newProject.name || !newProject.description) {
       setErrors({
         name: !newProject.name,
@@ -73,27 +112,46 @@ function Dashboard() {
     }
 
     const newProjectData = {
-      id: appData.proyectos.length + 1,
       titulo: newProject.name,
       descripcion: newProject.description,
-      montoTotal: 0,
-      usuarios: [userLogin],
-      tickets: []
     };
 
-    const updatedAppData = {
-      ...appData,
-      proyectos: [...appData.proyectos, newProjectData]
-    };
+    try {
+      const newProjectResponse = await fetch(
+        `http://localhost:8080/api/project/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newProjectData),
+        }
+      );
 
-    localStorage.setItem('appData', JSON.stringify(updatedAppData));
-    setAppData(updatedAppData);
+      if (!newProjectResponse.ok) {
+        throw new Error("Error al crear los proyectos.");
+      }
+      const projectsResponse = await fetch(
+        `http://localhost:8080/api/project/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const userProjects = updatedAppData.proyectos.filter(project =>
-      project.usuarios.some(user => user.id === userLogin.id)
-    );
-    setProjects(userProjects);
-    handleClose();
+      if (!projectsResponse.ok) {
+        throw new Error("Error al obtener los proyectos del usuario.");
+      }
+
+      const projectsData = await projectsResponse.json();
+      setProjects(projectsData);
+      handleClose();
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const handleEditSave = () => {
@@ -105,31 +163,37 @@ function Dashboard() {
       return;
     }
 
-    const updatedProjects = appData.proyectos.map(project =>
+    const updatedProjects = appData.proyectos.map((project) =>
       project.id === selectedProject.id
-        ? { ...project, titulo: editProject.name, descripcion: editProject.description }
+        ? {
+            ...project,
+            titulo: editProject.name,
+            descripcion: editProject.description,
+          }
         : project
     );
 
     const updatedAppData = { ...appData, proyectos: updatedProjects };
-    localStorage.setItem('appData', JSON.stringify(updatedAppData));
+    localStorage.setItem("appData", JSON.stringify(updatedAppData));
     setAppData(updatedAppData);
 
-    const userProjects = updatedAppData.proyectos.filter(project =>
-      project.usuarios.some(user => user.id === userLogin.id)
+    const userProjects = updatedAppData.proyectos.filter((project) =>
+      project.usuarios.some((user) => user.id === userLogin.id)
     );
     setProjects(userProjects);
     handleCloseEdit();
   };
 
   const handleDelete = (projectId) => {
-    const updatedProjects = appData.proyectos.filter(project => project.id !== projectId);
+    const updatedProjects = appData.proyectos.filter(
+      (project) => project.id !== projectId
+    );
     const updatedAppData = { ...appData, proyectos: updatedProjects };
-    localStorage.setItem('appData', JSON.stringify(updatedAppData));
+    localStorage.setItem("appData", JSON.stringify(updatedAppData));
     setAppData(updatedAppData);
 
-    const userProjects = updatedAppData.proyectos.filter(project =>
-      project.usuarios.some(user => user.id === userLogin.id)
+    const userProjects = updatedAppData.proyectos.filter((project) =>
+      project.usuarios.some((user) => user.id === userLogin.id)
     );
     setProjects(userProjects);
   };
@@ -149,15 +213,18 @@ function Dashboard() {
       <NavBar />
       <Box
         sx={{
-          background: 'linear-gradient(to bottom, #6a11cb, #2575fc)',
-          minHeight: '100vh',
+          background: "linear-gradient(to bottom, #6a11cb, #2575fc)",
+          minHeight: "100vh",
           py: 5,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Typography variant="h4" sx={{ color: '#fff', mb: 4, fontWeight: 'bold' }}>
+        <Typography
+          variant="h4"
+          sx={{ color: "#fff", mb: 4, fontWeight: "bold" }}
+        >
           Dashboard de Proyectos
         </Typography>
         <Container maxWidth="lg">
@@ -167,28 +234,41 @@ function Dashboard() {
               sx={{
                 mb: 3,
                 borderRadius: 4,
-                boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
-                background: '#ffffffdd',
-                backdropFilter: 'blur(10px)'
+                boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
+                background: "#ffffffdd",
+                backdropFilter: "blur(10px)",
               }}
             >
-              <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <CardContent
+                sx={{ display: "flex", justifyContent: "space-between" }}
+              >
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{project.titulo}</Typography>
-                  <Typography variant="body2" color="text.secondary">{project.descripcion}</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                    {project.titulo}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {project.descripcion}
+                  </Typography>
                 </Box>
-                <Typography variant="h6" sx={{ textAlign: 'right', fontWeight: 'bold', color: '#4caf50' }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    textAlign: "right",
+                    fontWeight: "bold",
+                    color: "#4caf50",
+                  }}
+                >
                   ${project.montoTotal}
                 </Typography>
               </CardContent>
-              <CardActions sx={{ justifyContent: 'flex-end' }}>
+              <CardActions sx={{ justifyContent: "flex-end" }}>
                 <Button
                   size="small"
                   variant="contained"
                   sx={{
-                    backgroundColor: '#6a11cb',
-                    color: '#fff',
-                    '&:hover': { backgroundColor: '#2575fc' }
+                    backgroundColor: "#6a11cb",
+                    color: "#fff",
+                    "&:hover": { backgroundColor: "#2575fc" },
                   }}
                   onClick={() => navigate(`/detalle-proyecto/${project.id}`)}
                 >
@@ -198,9 +278,9 @@ function Dashboard() {
                   size="small"
                   variant="contained"
                   sx={{
-                    backgroundColor: '#ffa726',
-                    color: '#fff',
-                    '&:hover': { backgroundColor: '#fb8c00' }
+                    backgroundColor: "#ffa726",
+                    color: "#fff",
+                    "&:hover": { backgroundColor: "#fb8c00" },
                   }}
                   onClick={() => handleOpenEdit(project)}
                 >
@@ -210,9 +290,9 @@ function Dashboard() {
                   size="small"
                   variant="contained"
                   sx={{
-                    backgroundColor: '#e53935',
-                    color: '#fff',
-                    '&:hover': { backgroundColor: '#d32f2f' }
+                    backgroundColor: "#e53935",
+                    color: "#fff",
+                    "&:hover": { backgroundColor: "#d32f2f" },
                   }}
                   onClick={() => handleDelete(project.id)}
                 >
@@ -221,17 +301,17 @@ function Dashboard() {
               </CardActions>
             </Card>
           ))}
-          <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Box sx={{ textAlign: "center", mt: 4 }}>
             <Button
               variant="contained"
               sx={{
-                backgroundColor: '#4caf50',
-                color: '#fff',
+                backgroundColor: "#4caf50",
+                color: "#fff",
                 py: 1.5,
                 px: 3,
-                fontSize: '1rem',
+                fontSize: "1rem",
                 borderRadius: 50,
-                '&:hover': { backgroundColor: '#388e3c' }
+                "&:hover": { backgroundColor: "#388e3c" },
               }}
               onClick={handleOpen}
             >
@@ -250,7 +330,7 @@ function Dashboard() {
                 value={newProject.name}
                 onChange={handleInputChange}
                 error={errors.name}
-                helperText={errors.name && 'El nombre es requerido'}
+                helperText={errors.name && "El nombre es requerido"}
               />
               <TextField
                 margin="dense"
@@ -260,12 +340,16 @@ function Dashboard() {
                 value={newProject.description}
                 onChange={handleInputChange}
                 error={errors.description}
-                helperText={errors.description && 'La descripción es requerida'}
+                helperText={errors.description && "La descripción es requerida"}
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose} color="secondary">Cancelar</Button>
-              <Button onClick={handleSave} color="primary">Guardar</Button>
+              <Button onClick={handleClose} color="secondary">
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} color="primary">
+                Guardar
+              </Button>
             </DialogActions>
           </Dialog>
           <Dialog open={openEdit} onClose={handleCloseEdit}>
@@ -280,7 +364,7 @@ function Dashboard() {
                 value={editProject.name}
                 onChange={handleEditInputChange}
                 error={errors.name}
-                helperText={errors.name && 'El nombre es requerido'}
+                helperText={errors.name && "El nombre es requerido"}
               />
               <TextField
                 margin="dense"
@@ -290,12 +374,16 @@ function Dashboard() {
                 value={editProject.description}
                 onChange={handleEditInputChange}
                 error={errors.description}
-                helperText={errors.description && 'La descripción es requerida'}
+                helperText={errors.description && "La descripción es requerida"}
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseEdit} color="secondary">Cancelar</Button>
-              <Button onClick={handleEditSave} color="primary">Guardar</Button>
+              <Button onClick={handleCloseEdit} color="secondary">
+                Cancelar
+              </Button>
+              <Button onClick={handleEditSave} color="primary">
+                Guardar
+              </Button>
             </DialogActions>
           </Dialog>
         </Container>

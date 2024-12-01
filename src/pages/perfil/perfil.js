@@ -1,119 +1,241 @@
 import React, { useState, useEffect } from "react";
-import { Container, TextField, Button, Box, Typography } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Paper,
+  Grid,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 function Perfil() {
-  // Estado para los datos del perfil
   const [profileData, setProfileData] = useState({
     email: "",
     password: "",
   });
-
-  // Estados para controlar la habilitación del botón y las validaciones
   const [emailError, setEmailError] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [showPasswordInputs, setShowPasswordInputs] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+  const token = localStorage.getItem("token");
 
-  const navigate = useNavigate(); // Para redirigir con el botón "Volver"
+  const navigate = useNavigate();
 
-  // Cargar la información del usuario desde localStorage al montar el componente
   useEffect(() => {
-    const userLogin = JSON.parse(localStorage.getItem("userLogin"));
-    if (userLogin) {
-      setProfileData({
-        email: userLogin.email,
-        password: userLogin.password,
-      });
-    }
+    const validateToken = async () => {
+      if (!token) {
+        console.error("No se encontró el token en localStorage.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "http://localhost:8080/api/validate-token",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al validar el token.");
+        }
+
+        const validateTokenData = await response.json();
+        const userId = validateTokenData.user.id;
+
+        const userResponse = await fetch(
+          `http://localhost:8080/api/user/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!userResponse.ok) {
+          throw new Error("Error al obtener los datos del usuario.");
+        }
+
+        const userData = await userResponse.json();
+
+        setProfileData({ email: userData.email, password: userData.password });
+      } catch (error) {
+        console.error("Error al validar el token:", error.message);
+      }
+    };
+
+    validateToken();
   }, []);
 
-  // Función para manejar los cambios en los inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData((prevData) => ({ ...prevData, [name]: value }));
 
-    // Validar si el campo email tiene formato válido
     if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       setEmailError(!emailRegex.test(value));
     }
 
-    // Habilitar el botón de guardar solo si hay un cambio y no hay errores
     const isComplete = profileData.email && profileData.password;
     setIsSaveDisabled(!(isComplete && !emailError));
   };
 
-  // Función para manejar el evento de guardar
-  const handleSave = () => {
-    if (!isSaveDisabled) {
-      // Guardar los datos actualizados en localStorage
-      const updatedUser = {
-        id: JSON.parse(localStorage.getItem("userLogin")).id,
-        email: profileData.email,
-        password: profileData.password,
-      };
+  const handleSaveEmail = () => {
+    console.log("Nuevo correo guardado:", profileData.email);
+    setShowEmailInput(false); // Close email input after saving
+  };
 
-      localStorage.setItem("userLogin", JSON.stringify(updatedUser));
+  const handleCancelEmail = () => {
+    setShowEmailInput(false); // Cancel email change
+  };
 
-      const appData = JSON.parse(localStorage.getItem("appData"));
-      if (appData) {
-        const updatedUsers = appData.usuarios.map((user) =>
-          user.id === updatedUser.id ? updatedUser : user
-        );
-        localStorage.setItem(
-          "appData",
-          JSON.stringify({ ...appData, usuarios: updatedUsers })
-        );
-      }
+  const handleSavePassword = () => {
+    console.log("Nueva contraseña guardada");
+    setShowPasswordInputs(false); // Close password input after saving
+  };
 
-      alert("Perfil guardado con éxito");
-    }
+  const handleCancelPassword = () => {
+    setShowPasswordInputs(false); // Cancel password change
   };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
-      <Box sx={{ textAlign: "center", mb: 4 }}>
-        <Typography variant="h4">Gestionar Perfil</Typography>
-      </Box>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
+          <Typography variant="h4" gutterBottom>
+            Gestionar Perfil
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Actualiza tus datos personales de forma segura.
+          </Typography>
+        </Box>
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Correo Electrónico"
-        name="email"
-        value={profileData.email}
-        onChange={handleInputChange}
-        error={emailError}
-        helperText={emailError ? "Correo inválido" : ""}
-      />
+        <Grid container spacing={3}>
+          {/* Sección de correo */}
+          <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
+            {!showEmailInput ? (
+              <>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setShowEmailInput(true)}
+                  sx={{ mt: 2 }}
+                >
+                  Cambiar Correo
+                </Button>
+              </>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                <TextField
+                  fullWidth
+                  label="Nuevo Correo Electrónico"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleInputChange}
+                  error={emailError}
+                  helperText={emailError ? "Correo inválido" : ""}
+                  variant="outlined"
+                />
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "center", width: "100%" }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSaveEmail}
+                    disabled={emailError}
+                    sx={{ mr: 2 }}
+                  >
+                    Guardar Correo
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleCancelEmail}
+                  >
+                    Cancelar
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </Grid>
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Contraseña"
-        name="password"
-        type="password"
-        value={profileData.password}
-        onChange={handleInputChange}
-      />
+          {/* Sección de contraseña */}
+          <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
+            {!showPasswordInputs ? (
+              <>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setShowPasswordInputs(true)}
+                  sx={{ mt: 2 }}
+                >
+                  Cambiar Contraseña
+                </Button>
+              </>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                <TextField
+                  fullWidth
+                  label="Contraseña Actual"
+                  name="oldPassword"
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  variant="outlined"
+                />
+                <TextField
+                  fullWidth
+                  label="Nueva Contraseña"
+                  name="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  error={passwordError}
+                  helperText={passwordError ? "Debe tener al menos 6 caracteres" : ""}
+                  variant="outlined"
+                  sx={{ mt: 2 }}
+                />
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "center", width: "100%" }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSavePassword}
+                    disabled={passwordError}
+                    sx={{ mr: 2 }}
+                  >
+                    Guardar Contraseña
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleCancelPassword}
+                  >
+                    Cancelar
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </Grid>
+        </Grid>
 
-      {/* Botones para guardar o volver */}
-      <Box sx={{ mt: 4, display: "flex", justifyContent: "space-between" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={isSaveDisabled}
-        >
-          Guardar
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => navigate("/dashboard")} // Navegar a la página anterior
-        >
-          Volver
-        </Button>
-      </Box>
+        <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => navigate("/dashboard")}
+          >
+            Volver
+          </Button>
+        </Box>
+      </Paper>
     </Container>
   );
 }

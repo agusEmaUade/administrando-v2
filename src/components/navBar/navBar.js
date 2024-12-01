@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
-import { AppBar, Toolbar, Button, IconButton, Menu, MenuItem, Avatar, Box } from '@mui/material';
-import { Link } from 'react-router-dom';
-import './navBar.css'; // Archivo de estilos personalizados
+import React, { useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Box,
+} from "@mui/material";
+import { Link } from "react-router-dom";
+import "./navBar.css"; // Archivo de estilos personalizados
 
 function NavBar() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -12,10 +21,14 @@ function NavBar() {
     setAnchorEl(event.currentTarget);
   };
 
-  // Manejo del cierre del menú
   const handleClose = () => {
     setAnchorEl(null);
+    localStorage.removeItem("token");
   };
+
+    const handleMiPerfilClose = () => {
+      setAnchorEl(null);
+    };
 
   return (
     <AppBar position="static" className="navbar">
@@ -33,11 +46,7 @@ function NavBar() {
         </Box>
 
         {/* Ícono de usuario alineado a la derecha */}
-        <IconButton
-          edge="end"
-          color="inherit"
-          onClick={handleMenuClick}
-        >
+        <IconButton edge="end" color="inherit" onClick={handleMenuClick}>
           <Avatar></Avatar> {/* Inicial del usuario, puedes personalizarla */}
         </IconButton>
 
@@ -45,17 +54,17 @@ function NavBar() {
         <Menu
           anchorEl={anchorEl}
           open={open}
-          onClose={handleClose}
+          onClose={handleMiPerfilClose}
           anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: "top",
+            horizontal: "right",
           }}
           transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: "top",
+            horizontal: "right",
           }}
         >
-          <MenuItem onClick={handleClose} component={Link} to="/mi-perfil">
+          <MenuItem onClick={handleMiPerfilClose} component={Link} to="/mi-perfil">
             Mi Perfil
           </MenuItem>
           <MenuItem onClick={handleClose} component={Link} to="/">
