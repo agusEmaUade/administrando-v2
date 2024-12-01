@@ -16,12 +16,13 @@ function Perfil() {
     password: "",
   });
   const [emailError, setEmailError] = useState(false);
-  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [showPasswordInputs, setShowPasswordInputs] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [email, setEmail] = useState("");
   const token = localStorage.getItem("token");
 
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ function Perfil() {
 
         const validateTokenData = await response.json();
         const userId = validateTokenData.user.id;
+        setUserId(userId);
 
         const userResponse = await fetch(
           `http://localhost:8080/api/user/${userId}`,
@@ -67,7 +69,8 @@ function Perfil() {
 
         const userData = await userResponse.json();
 
-        setProfileData({ email: userData.email, password: userData.password });
+        setProfileData({ email: userData.email });
+        setEmail(userData.email);
       } catch (error) {
         console.error("Error al validar el token:", error.message);
       }
@@ -76,35 +79,81 @@ function Perfil() {
     validateToken();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prevData) => ({ ...prevData, [name]: value }));
 
-    if (name === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      setEmailError(!emailRegex.test(value));
+  const handleSaveEmail = async () => {
+    if (!token || !userId) {
+      console.error("Token o UserId no disponibles.");
+      return;
     }
-
-    const isComplete = profileData.email && profileData.password;
-    setIsSaveDisabled(!(isComplete && !emailError));
+  
+    try {
+      const response = await fetch(`http://localhost:8080/api/user/${userId}/email`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email: email }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al actualizar el correo electrónico.");
+      }
+  
+      const data = await response.json();
+      console.log("Correo actualizado:", data);
+  
+      alert("Correo electrónico actualizado con éxito.");
+      setShowEmailInput(false); // Cierra el input después de guardar
+    } catch (error) {
+      console.error("Error al actualizar el correo electrónico:", error.message);
+      alert("Hubo un problema al actualizar el correo electrónico.");
+    }
   };
-
-  const handleSaveEmail = () => {
-    console.log("Nuevo correo guardado:", profileData.email);
-    setShowEmailInput(false); // Close email input after saving
-  };
+  
 
   const handleCancelEmail = () => {
-    setShowEmailInput(false); // Cancel email change
+    setShowEmailInput(false);
   };
 
-  const handleSavePassword = () => {
-    console.log("Nueva contraseña guardada");
-    setShowPasswordInputs(false); // Close password input after saving
+
+  const handleSavePassword = async () => {
+    if (!token || !userId) {
+      console.error("Token o UserId no disponibles.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`http://localhost:8080/api/user/${userId}/password`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          oldPassword: oldPassword,
+          newPassword: newPassword,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al actualizar la contraseña.");
+      }
+  
+      const data = await response.json();
+      console.log("Contraseña actualizada:", data);
+  
+      alert("Contraseña actualizada con éxito.");
+      setShowPasswordInputs(false); // Cierra los inputs después de guardar
+    } catch (error) {
+      console.error("Error al actualizar la contraseña:", error.message);
+      alert("Hubo un problema al actualizar la contraseña.");
+    }
   };
+  
 
   const handleCancelPassword = () => {
-    setShowPasswordInputs(false); // Cancel password change
+    setShowPasswordInputs(false);
   };
 
   return (
@@ -139,8 +188,8 @@ function Perfil() {
                   fullWidth
                   label="Nuevo Correo Electrónico"
                   name="email"
-                  value={profileData.email}
-                  onChange={handleInputChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   error={emailError}
                   helperText={emailError ? "Correo inválido" : ""}
                   variant="outlined"
