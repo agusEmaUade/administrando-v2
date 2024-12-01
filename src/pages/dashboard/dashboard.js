@@ -27,7 +27,7 @@ function Dashboard() {
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [newProject, setNewProject] = useState({ name: "", description: "" });
-  const [editProject, setEditProject] = useState({ name: "", description: "" });
+  const [editProject, setEditProject] = useState({id:"", name: "", description: "" });
   const [errors, setErrors] = useState({ name: false, description: false });
   const token = localStorage.getItem("token");
 
@@ -91,7 +91,7 @@ function Dashboard() {
 
   const handleOpenEdit = (project) => {
     setSelectedProject(project);
-    setEditProject({ name: project.titulo, description: project.descripcion });
+    setEditProject({ id: project.id, name: project.titulo, description: project.descripcion });
     setOpenEdit(true);
   };
 
@@ -154,7 +154,7 @@ function Dashboard() {
     }
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!editProject.name || !editProject.description) {
       setErrors({
         name: !editProject.name,
@@ -162,41 +162,83 @@ function Dashboard() {
       });
       return;
     }
-
-    const updatedProjects = appData.proyectos.map((project) =>
-      project.id === selectedProject.id
-        ? {
-            ...project,
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/project/${editProject.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
             titulo: editProject.name,
             descripcion: editProject.description,
-          }
-        : project
-    );
+          }),
+        }
+      );
 
-    const updatedAppData = { ...appData, proyectos: updatedProjects };
-    localStorage.setItem("appData", JSON.stringify(updatedAppData));
-    setAppData(updatedAppData);
+      if (!response.ok) {
+        throw new Error("Error al actualizar el proyecto.");
+      }
 
-    const userProjects = updatedAppData.proyectos.filter((project) =>
-      project.usuarios.some((user) => user.id === userLogin.id)
-    );
-    setProjects(userProjects);
-    handleCloseEdit();
+      const projectsResponse = await fetch(
+        `http://localhost:8080/api/project/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!projectsResponse.ok) {
+        throw new Error("Error al obtener los proyectos del usuario.");
+      }
+
+      const projectsData = await projectsResponse.json();
+      setProjects(projectsData);
+      handleCloseEdit();
+    } catch (error) {
+      console.error("Error al guardar los cambios:", error.message);
+      alert("Ocurrió un error al actualizar el proyecto.");
+    }
   };
 
-  const handleDelete = (projectId) => {
-    const updatedProjects = appData.proyectos.filter(
-      (project) => project.id !== projectId
-    );
-    const updatedAppData = { ...appData, proyectos: updatedProjects };
-    localStorage.setItem("appData", JSON.stringify(updatedAppData));
-    setAppData(updatedAppData);
-
-    const userProjects = updatedAppData.proyectos.filter((project) =>
-      project.usuarios.some((user) => user.id === userLogin.id)
-    );
-    setProjects(userProjects);
+  const handleDelete = async (projectId) => {
+    try {
+      const deleteResponse = await fetch(`http://localhost:8080/api/project/${projectId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!deleteResponse.ok) {
+        throw new Error("Error al eliminar el proyecto.");
+      }
+  
+      console.log(`Proyecto ${projectId} eliminado exitosamente.`);
+  
+      const projectsResponse = await fetch(`http://localhost:8080/api/project/${userId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!projectsResponse.ok) {
+        throw new Error("Error al obtener los proyectos del usuario.");
+      }
+  
+      const projectsData = await projectsResponse.json();
+      setProjects(projectsData);
+    } catch (error) {
+      console.error("Error al eliminar el proyecto:", error.message);
+      alert("Ocurrió un error al eliminar el proyecto.");
+    }
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
